@@ -1,0 +1,18 @@
+name: Billboards
+main: de.blablubbabc.billboards.Billboards
+version: 1.0
+author: blablubbabc
+description: Rent-able signs.
+depend: [Vault]
+commands:
+    billboard:
+      description: Used to add a sign.
+      usage: /<command>
+      aliases: adsign
+permissions:
+  billboards.admin:
+    description: Can add, remove all billboard signs.
+    default: op
+  billboards.rent:
+    description: Can rent and edit own billboard signs.
+    default: true
