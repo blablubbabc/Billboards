@@ -132,7 +132,7 @@ public class EventListener implements Listener {
 									long days = TimeUnit.MILLISECONDS.toDays(left);
 									long hours = TimeUnit.MILLISECONDS.toHours(left) - TimeUnit.DAYS.toHours(days);
 									long minutes = TimeUnit.MILLISECONDS.toMinutes(left) - TimeUnit.DAYS.toMinutes(days) - TimeUnit.HOURS.toMinutes(hours);
-									String timeLeft = String.format("%d Tage %d h %d min", days, hours, minutes);
+									String timeLeft = String.format("%d days %d h %d min", days, hours, minutes);
 									
 									player.sendMessage(Messages.getMessage(Message.INFO_TIME_LEFT, timeLeft));
 								}
