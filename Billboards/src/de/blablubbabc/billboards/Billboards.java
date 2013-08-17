@@ -32,9 +32,9 @@ public class Billboards extends JavaPlugin {
 	private int defaultPrice = 10;
 	private int defaultDurationDays = 7;
 	
-	public Map<String, AdSign> customers = new HashMap<String, AdSign>();
+	public Map<String, Billboard> customers = new HashMap<String, Billboard>();
 	
-	private List<AdSign> signs = new ArrayList<AdSign>();
+	private List<Billboard> signs = new ArrayList<Billboard>();
 	
 	@Override
 	public void onEnable() {
@@ -90,12 +90,12 @@ public class Billboards extends JavaPlugin {
 			player.sendMessage(Messages.getMessage(Message.NO_TARGETED_SIGN));
 		} else {
 			Location loc = block.getLocation();
-			if (getAdSign(loc) != null) {
+			if (getBillboard(loc) != null) {
 				player.sendMessage(Messages.getMessage(Message.ALREADY_BILLBOARD_SIGN));
 			} else {
-				AdSign adsign = new AdSign(new SoftLocation(loc.getWorld().getName(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()), null, defaultDurationDays, defaultPrice, 0);
-				signs.add(adsign);
-				refreshSign(adsign);
+				Billboard billboard = new Billboard(new SoftLocation(loc.getWorld().getName(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()), null, defaultDurationDays, defaultPrice, 0);
+				signs.add(billboard);
+				refreshSign(billboard);
 				saveCurrentConfig();
 				
 				player.sendMessage(Messages.getMessage(Message.ADDED_SIGN));
@@ -113,63 +113,63 @@ public class Billboards extends JavaPlugin {
 		return (economy != null);
 	}
 	
-	public void removeAdSign(AdSign adsign) {
-		signs.remove(adsign);
+	public void removeBillboard(Billboard billboard) {
+		signs.remove(billboard);
 		saveCurrentConfig();
 	}
 	
-	public AdSign getAdSign(Location loc) {
-		for (AdSign adsign : signs) {
-			if (adsign.getLocation().isSameLocation(loc)) return adsign;
+	public Billboard getBillboard(Location loc) {
+		for (Billboard billboard : signs) {
+			if (billboard.getLocation().isSameLocation(loc)) return billboard;
 		}
 		return null;
 	}
 	
 	// return true if the sign is still valid
-	public boolean refreshSign(AdSign adsign) {
-		if (!signs.contains(adsign)) {
-			logger.warning("AdSign'" + adsign.getLocation().toString() + "' is no longer an valid billboard sign, but was refreshed.");
+	public boolean refreshSign(Billboard billboard) {
+		if (!signs.contains(billboard)) {
+			logger.warning("Billboard '" + billboard.getLocation().toString() + "' is no longer an valid billboard sign, but was refreshed.");
 			return false;
 		}
 		
-		Location location = adsign.getLocation().getBukkitLocation(this);
+		Location location = billboard.getLocation().getBukkitLocation(this);
 		if (location == null) {
-			logger.warning("World '" + adsign.getLocation().getWorldName() + "' not found. Removing this billboard sign.");
-			removeAdSign(adsign);
+			logger.warning("World '" + billboard.getLocation().getWorldName() + "' not found. Removing this billboard sign.");
+			removeBillboard(billboard);
 			return false;
 		}
 		
 		Block block = location.getBlock();
 		if (!(block.getState() instanceof Sign)) {
-			logger.warning("AdSign'" + adsign.getLocation().toString() + "' is no longer a sign. Removing this billboard sign.");
-			removeAdSign(adsign);
+			logger.warning("Billboard '" + billboard.getLocation().toString() + "' is no longer a sign. Removing this billboard sign.");
+			removeBillboard(billboard);
 			return false;
 		}
 		
 		// check rent time if has owner:
-		if (adsign.hasOwner() && adsign.isRentOver()) {
-			adsign.resetOwner();
+		if (billboard.hasOwner() && billboard.isRentOver()) {
+			billboard.resetOwner();
 		}
 		// update text if has no owner:
-		if (!adsign.hasOwner()) {
+		if (!billboard.hasOwner()) {
 			Sign sign = (Sign) block.getState();
-			updateText(adsign, sign);
+			updateText(billboard, sign);
 		}
 		
 		return true;
 	}
 	
-	private void updateText(AdSign adsign, Sign sign) {
+	private void updateText(Billboard billboard, Sign sign) {
 		String line0 = Messages.getMessage(Message.SIGN_LINE_1);
 		if (line0.length() >= 16) line0 = line0.substring(0, 16);
 		
 		String line1 = Messages.getMessage(Message.SIGN_LINE_2);
 		if (line1.length() >= 16) line1 = line1.substring(0, 16);
 		
-		String line2 = Messages.getMessage(Message.SIGN_LINE_3, String.valueOf(adsign.getPrice()));
+		String line2 = Messages.getMessage(Message.SIGN_LINE_3, String.valueOf(billboard.getPrice()));
 		if (line2.length() >= 16) line2 = line2.substring(0, 16);
 		
-		String line3 = Messages.getMessage(Message.SIGN_LINE_4, String.valueOf(adsign.getDurationInDays()));
+		String line3 = Messages.getMessage(Message.SIGN_LINE_4, String.valueOf(billboard.getDurationInDays()));
 		if (line3.length() >= 16) line3 = line3.substring(0, 16);
 		
 		sign.setLine(0, line0);
@@ -180,36 +180,36 @@ public class Billboards extends JavaPlugin {
 	}
 	
 	public void refreshAllSigns() {
-		List<AdSign> forRemoval = new ArrayList<AdSign>();
-		for (AdSign adsign : signs) {
-			Location location = adsign.getLocation().getBukkitLocation(this);
+		List<Billboard> forRemoval = new ArrayList<Billboard>();
+		for (Billboard billboard : signs) {
+			Location location = billboard.getLocation().getBukkitLocation(this);
 			if (location == null) {
-				logger.warning("World '" + adsign.getLocation().getWorldName() + "' not found. Removing this billboard sign.");
-				forRemoval.add(adsign);
+				logger.warning("World '" + billboard.getLocation().getWorldName() + "' not found. Removing this billboard sign.");
+				forRemoval.add(billboard);
 				continue;
 			}
 			Block block = location.getBlock();
 			if (!(block.getState() instanceof Sign)) {
-				logger.warning("Billboard sign '" + adsign.getLocation().toString() + "' is no longer a sign. Removing this billboard sign.");
-				forRemoval.add(adsign);
+				logger.warning("Billboard sign '" + billboard.getLocation().toString() + "' is no longer a sign. Removing this billboard sign.");
+				forRemoval.add(billboard);
 				continue;
 			}
 			
 			// check rent time if has owner:
-			if (adsign.hasOwner() && adsign.isRentOver()) {
-				adsign.resetOwner();
+			if (billboard.hasOwner() && billboard.isRentOver()) {
+				billboard.resetOwner();
 			}
 			// update text if has no owner:
-			if (!adsign.hasOwner()) {
+			if (!billboard.hasOwner()) {
 				Sign sign = (Sign) block.getState();
-				updateText(adsign, sign);
+				updateText(billboard, sign);
 			}
 			
 		}
-		// remove invalid AdSigns:
+		// remove invalid billboards:
 		if (forRemoval.size() > 0) {
-			for (AdSign adsign : forRemoval) {
-				signs.remove(adsign);
+			for (Billboard billboard : forRemoval) {
+				signs.remove(billboard);
 			}
 			saveCurrentConfig();
 		}
@@ -247,7 +247,7 @@ public class Billboards extends JavaPlugin {
 				int price = signSection.getInt("Price", defaultPrice);
 				long startTime = signSection.getLong("StartTime", 0L);
 				
-				signs.add(new AdSign(soft, owner, durationInDays, price, startTime));
+				signs.add(new Billboard(soft, owner, durationInDays, price, startTime));
 			}
 		}
 		
@@ -258,18 +258,21 @@ public class Billboards extends JavaPlugin {
 	
 	public void saveCurrentConfig() {
 		FileConfiguration config = getConfig();
+		
 		// write settings to config:
 		config.set("Settings.DefaultPrice", defaultPrice);
 		config.set("Settings.DefaultDurationInDays", defaultDurationDays);
+		
 		// write signs to config:
 		// first clear signs section:
 		config.set("Signs", null);
-		for (AdSign adsign : signs) {
-			String node = "Signs." + adsign.getLocation().toString();
-			config.set(node + ".Owner", adsign.getOwner());
-			config.set(node + ".Duration", adsign.getDurationInDays());
-			config.set(node + ".Price", adsign.getPrice());
-			config.set(node + ".StartTime", adsign.getStartTime());
+		// then insert current information:
+		for (Billboard billboard : signs) {
+			String node = "Signs." + billboard.getLocation().toString();
+			config.set(node + ".Owner", billboard.getOwner());
+			config.set(node + ".Duration", billboard.getDurationInDays());
+			config.set(node + ".Price", billboard.getPrice());
+			config.set(node + ".StartTime", billboard.getStartTime());
 		}
 		
 		saveConfig();

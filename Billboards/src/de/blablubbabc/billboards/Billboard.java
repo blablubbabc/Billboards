@@ -1,13 +1,13 @@
 package de.blablubbabc.billboards;
 
-public class AdSign {
+public class Billboard {
 	private SoftLocation location;
 	private String owner;
 	private int durationInDays;
 	private int price;
 	private long startTime;
 	
-	public AdSign(SoftLocation location, String owner, int durationInDays, int price, long startTime) {
+	public Billboard(SoftLocation location, String owner, int durationInDays, int price, long startTime) {
 		this.location = location;
 		this.owner = (owner == null || owner.isEmpty()) ? "SERVER" : owner;
 		this.durationInDays = durationInDays;
