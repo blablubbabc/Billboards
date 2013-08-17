@@ -93,7 +93,23 @@ public class Billboards extends JavaPlugin {
 			if (getBillboard(loc) != null) {
 				player.sendMessage(Messages.getMessage(Message.ALREADY_BILLBOARD_SIGN));
 			} else {
-				Billboard billboard = new Billboard(new SoftLocation(loc.getWorld().getName(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()), null, defaultDurationDays, defaultPrice, 0);
+				int duration = defaultDurationDays;
+				int price = defaultPrice;
+				
+				if (args.length == 2) {
+					Integer priceArgument = parseInteger(args[0]);
+					if (priceArgument == null) {
+						player.sendMessage(Messages.getMessage(Message.INVALID_NUMBER, args[0]));
+						return true;
+					}
+					Integer durationArgument = parseInteger(args[1]);
+					if (durationArgument == null) {
+						player.sendMessage(Messages.getMessage(Message.INVALID_NUMBER, args[1]));
+						return true;
+					}
+				}
+				
+				Billboard billboard = new Billboard(new SoftLocation(loc.getWorld().getName(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()), null, duration, price, 0);
 				signs.add(billboard);
 				refreshSign(billboard);
 				saveCurrentConfig();
@@ -102,6 +118,14 @@ public class Billboards extends JavaPlugin {
 			}
 		}
 		return true;
+	}
+	
+	private Integer parseInteger(String string) {
+		try {
+			return Integer.parseInt(string);
+		} catch(NumberFormatException e) {
+			return null;
+		}
 	}
 	
 	private boolean setupEconomy() {
