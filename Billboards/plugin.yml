@@ -1,13 +1,13 @@
 name: Billboards
 main: de.blablubbabc.billboards.Billboards
-version: 1.0
+version: 1.1
 author: blablubbabc
 description: Rent-able signs.
 depend: [Vault]
 commands:
     billboard:
       description: Used to add a sign.
-      usage: /<command>
+      usage: /<command> [<price> <duration>]
       aliases: adsign
 permissions:
   billboards.admin:
