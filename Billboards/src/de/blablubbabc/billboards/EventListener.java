@@ -27,6 +27,7 @@ import org.bukkit.inventory.ItemStack;
 public class EventListener implements Listener {
 	
 	private Map<String, SignEdit> edit = new HashMap<String, SignEdit>();
+	private SimpleDateFormat dateFormat = new SimpleDateFormat(Messages.getMessage(Message.DATE_FORMAT));
 
 	@EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
 	public void onBlockBreak(BlockBreakEvent event) {
@@ -123,16 +124,16 @@ public class EventListener implements Listener {
 									player.sendMessage(Messages.getMessage(Message.INFO_OWNER, adsign.getOwner()));
 									player.sendMessage(Messages.getMessage(Message.INFO_PRICE, String.valueOf(adsign.getPrice())));
 									player.sendMessage(Messages.getMessage(Message.INFO_DURATION, String.valueOf(adsign.getDurationInDays())));
-									player.sendMessage(Messages.getMessage(Message.INFO_RENT_SINCE, new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date(adsign.getStartTime()))));
+									player.sendMessage(Messages.getMessage(Message.INFO_RENT_SINCE, dateFormat.format(new Date(adsign.getStartTime()))));
 									
 									long endTime = adsign.getEndTime();
-									player.sendMessage(Messages.getMessage(Message.INFO_RENT_UNTIL, new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date(endTime))));
+									player.sendMessage(Messages.getMessage(Message.INFO_RENT_UNTIL, dateFormat.format(new Date(endTime))));
 									
 									long left = endTime - System.currentTimeMillis();
 									long days = TimeUnit.MILLISECONDS.toDays(left);
 									long hours = TimeUnit.MILLISECONDS.toHours(left) - TimeUnit.DAYS.toHours(days);
 									long minutes = TimeUnit.MILLISECONDS.toMinutes(left) - TimeUnit.DAYS.toMinutes(days) - TimeUnit.HOURS.toMinutes(hours);
-									String timeLeft = String.format("%d days %d h %d min", days, hours, minutes);
+									String timeLeft = String.format(Messages.getMessage(Message.TIME_REMAINING_FORMAT), days, hours, minutes);
 									
 									player.sendMessage(Messages.getMessage(Message.INFO_TIME_LEFT, timeLeft));
 								}
