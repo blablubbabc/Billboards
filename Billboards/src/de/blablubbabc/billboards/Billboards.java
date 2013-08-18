@@ -107,6 +107,8 @@ public class Billboards extends JavaPlugin {
 						player.sendMessage(Messages.getMessage(Message.INVALID_NUMBER, args[1]));
 						return true;
 					}
+					price = priceArgument.intValue();
+					duration = durationArgument.intValue();
 				}
 				
 				Billboard billboard = new Billboard(new SoftLocation(loc.getWorld().getName(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()), null, duration, price, 0);
