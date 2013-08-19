@@ -73,6 +73,6 @@ public class Billboard {
 	}
 	
 	public boolean isRentOver() {
-		return !hasOwner() || getEndTime() < System.currentTimeMillis();
+		return !hasOwner() || getTimeLeft() <= 0;
 	}
 }
