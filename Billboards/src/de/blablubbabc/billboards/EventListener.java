@@ -57,19 +57,20 @@ public class EventListener implements Listener {
 	}
 	
 	@SuppressWarnings("deprecation")
-	@EventHandler(ignoreCancelled = false, priority = EventPriority.HIGHEST)
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
 	public void onInteract(PlayerInteractEvent event) {
 		Player player = event.getPlayer();
 		String playerName = player.getName();
-		Block block = event.getClickedBlock();
-		if (block != null && event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+		Block clickedBlock = event.getClickedBlock();
+		
+		if (clickedBlock != null && event.getAction() == Action.RIGHT_CLICK_BLOCK) {
 			
-			Billboard billboardC = Billboards.instance.customers.get(playerName);
-			Billboards.instance.customers.remove(playerName);
+			Billboard billboardC = Billboards.instance.customers.remove(playerName);
 			
-			if (block.getType() == Material.SIGN_POST || block.getType() == Material.WALL_SIGN) {
-				Billboard billboard = Billboards.instance.getBillboard(block.getLocation());
+			if (clickedBlock.getType() == Material.SIGN_POST || clickedBlock.getType() == Material.WALL_SIGN) {
+				Billboard billboard = Billboards.instance.getBillboard(clickedBlock.getLocation());
 				if (billboard != null && Billboards.instance.refreshSign(billboard)) {
+					
 					if (billboardC != null && billboardC == billboard) {
 						// check if it's still available:
 						if (!billboard.hasOwner()) {
@@ -116,8 +117,7 @@ public class EventListener implements Listener {
 								// is owner -> edit
 								if (player.getItemInHand().getType() == Material.SIGN && billboard.hasOwner() && (billboard.getOwner().equals(playerName) || player.hasPermission(Billboards.PERMISSION_ADMIN))) {
 									// do not cancel, so that the place event is called:
-									if (event.isCancelled()) event.setCancelled(false);
-									edit.put(playerName, new SignEdit(block.getRelative(event.getBlockFace()).getLocation(), billboard));
+									event.setCancelled(false);
 								} else {
 									// print information of sign:
 									player.sendMessage(Messages.getMessage(Message.INFO_HEADER));
@@ -147,28 +147,49 @@ public class EventListener implements Listener {
 		}
 	}
 	
-	@EventHandler(priority=EventPriority.HIGHEST)
-	public void onBlockPlace(BlockPlaceEvent event) {
-		Block block = event.getBlockPlaced();
+	@EventHandler(priority=EventPriority.LOWEST, ignoreCancelled = false)
+	public void onBlockPlaceEarly(BlockPlaceEvent event) {
+		Block placed = event.getBlockPlaced();
+		Material typePlaced = placed.getType();
+		
+		if (!(typePlaced == Material.WALL_SIGN || typePlaced == Material.SIGN_POST)) return;
+		
 		Block against = event.getBlockAgainst();
-		if (!(block.getType() == Material.WALL_SIGN || block.getType() == Material.SIGN_POST) || !(against.getType() == Material.WALL_SIGN || against.getType() == Material.SIGN_POST)) return;
+		Material typeAgainst = against.getType();
+		
+		if (!(typeAgainst == Material.WALL_SIGN || typeAgainst == Material.SIGN_POST)) return;
+		
+		Billboard billboard = Billboards.instance.getBillboard(against.getLocation());
+		
+		if (billboard != null) {
+			Player player = event.getPlayer();
+			String playerName = player.getName();
+			
+			// cancle event, so other plugins ignore it and don't print messages for cancelling it:
+			// also makes sure, that no block is placed against a billboard sign
+			event.setCancelled(true);
+			
+			if (billboard.hasOwner() && (billboard.getOwner().equals(playerName) || player.hasPermission(Billboards.PERMISSION_ADMIN))) {
+				edit.put(playerName, new SignEdit(placed.getLocation(), billboard));
+			}
+		}
+	}
+	
+	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled = false)
+	public void onBlockPlaceLate(BlockPlaceEvent event) {
 		Player player = event.getPlayer();
 		String playerName = player.getName();
 		
 		if (edit.containsKey(playerName)) {
-			if (event.isCancelled()) event.setCancelled(false);
+			// make sure the sign can be placed, so that the sign edit window opens for the player
+			event.setCancelled(false);
+			
 			/*Sign update = (Sign) block.getState();
 			Sign editing = (Sign) event.getBlockAgainst().getState();
 			int i = 0;
 			for (String line : editing.getLines())
 				update.setLine(i++, line.replace("&", "&&").replace('§', '&'));
 			update.update();*/
-		} else {
-			Billboard billboard = Billboards.instance.getBillboard(against.getLocation());
-			if (billboard != null) {
-				// no sign placing against a billboard, if not in edit mode:
-				event.setCancelled(true);
-			}
 		}
 	}
 	
@@ -178,7 +199,7 @@ public class EventListener implements Listener {
 		Player player = event.getPlayer();
 		String playerName = player.getName();
 		
-		SignEdit signEdit = edit.get(playerName);
+		SignEdit signEdit = edit.remove(playerName);
 		if (signEdit != null) {
 			if (Billboards.instance.refreshSign(signEdit.billboard)) {
 				// still owner and has still the permission?
@@ -191,7 +212,6 @@ public class EventListener implements Listener {
 				}
 			}
 			// cancle and give sign back:
-			edit.remove(playerName);
 			event.setCancelled(true);
 			signEdit.source.getBlock().setType(Material.AIR);
 			if (player.getGameMode() != GameMode.CREATIVE) {

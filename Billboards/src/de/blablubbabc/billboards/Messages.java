@@ -27,8 +27,8 @@ class Messages {
 		addDefault(defaults, Message.ONLY_AS_PLAYER, "This only works as player.", null);
 		addDefault(defaults, Message.INFO_HEADER, "&3Billboard - Information", null);
 		addDefault(defaults, Message.INFO_OWNER, "&5Owner: &2{0}", "0: owner");
-		addDefault(defaults, Message.INFO_PRICE, "&5Price: &2{0} Gold", "0: price");
-		addDefault(defaults, Message.INFO_DURATION, "&5Duration: &2{0} Tage", "0: duration");
+		addDefault(defaults, Message.INFO_PRICE, "&5Price: &2{0} gold", "0: price");
+		addDefault(defaults, Message.INFO_DURATION, "&5Duration: &2{0} days", "0: duration");
 		addDefault(defaults, Message.INFO_RENT_SINCE, "&5Rented since: &2{0}", "0: since date");
 		addDefault(defaults, Message.INFO_RENT_UNTIL, "&5Rented until: &2{0}", "0: until date");
 		addDefault(defaults, Message.INFO_TIME_LEFT, "&5Time remaining: &2{0}", "0: time left");
