@@ -71,6 +71,9 @@ public class EventListener implements Listener {
 				Billboard billboard = Billboards.instance.getBillboard(clickedBlock.getLocation());
 				if (billboard != null && Billboards.instance.refreshSign(billboard)) {
 					
+					// cancle all block placing against a billboard sign already here:
+					event.setCancelled(true);
+					
 					if (billboardC != null && billboardC == billboard) {
 						// check if it's still available:
 						if (!billboard.hasOwner()) {
@@ -166,7 +169,6 @@ public class EventListener implements Listener {
 			String playerName = player.getName();
 			
 			// cancle event, so other plugins ignore it and don't print messages for cancelling it:
-			// also makes sure, that no block is placed against a billboard sign
 			event.setCancelled(true);
 			
 			if (billboard.hasOwner() && (billboard.getOwner().equals(playerName) || player.hasPermission(Billboards.PERMISSION_ADMIN))) {
