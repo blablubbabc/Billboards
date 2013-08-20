@@ -27,12 +27,12 @@ class Messages {
 		addDefault(defaults, Message.ONLY_AS_PLAYER, "This only works as player.", null);
 		addDefault(defaults, Message.INFO_HEADER, "&3Billboard - Information", null);
 		addDefault(defaults, Message.INFO_OWNER, "&5Owner: &2{0}", "0: owner");
-		addDefault(defaults, Message.INFO_PRICE, "&5Price: &2{0} gold", "0: price");
+		addDefault(defaults, Message.INFO_PRICE, "&5Price: &2{0} $", "0: price");
 		addDefault(defaults, Message.INFO_DURATION, "&5Duration: &2{0} days", "0: duration");
 		addDefault(defaults, Message.INFO_RENT_SINCE, "&5Rented since: &2{0}", "0: since date");
 		addDefault(defaults, Message.INFO_RENT_UNTIL, "&5Rented until: &2{0}", "0: until date");
 		addDefault(defaults, Message.INFO_TIME_LEFT, "&5Time remaining: &2{0}", "0: time left");
-		addDefault(defaults, Message.CLICK_TO_RENT, "&6Click the sign again, to rent it for &8{0} $ &6for &8{1} days &6.", "0: price  1: duration");
+		addDefault(defaults, Message.CLICK_TO_RENT, "&6Click the sign again, to rent it for &8{0} $ &6for &8{1} days&6.", "0: price  1: duration");
 		addDefault(defaults, Message.YOU_HAVE_RENT_A_SIGN, "&aYou have rented this sign now for &8{1} days &a. \nTo edit it: right-click it with a sign", "0: price  1: duration");
 		addDefault(defaults, Message.TRANSACTION_FAILURE, "&cSomething went wrong: {0}", "0: errorMessage");
 		addDefault(defaults, Message.NO_LONGER_AVAILABLE, "&cThis sign is no longer available!", null);
@@ -40,7 +40,7 @@ class Messages {
 		addDefault(defaults, Message.NO_PERMISSION, "&cYou have no permission for that.", null);
 		addDefault(defaults, Message.SIGN_LINE_1, "&3RENT ME", null);
 		addDefault(defaults, Message.SIGN_LINE_2, "&5(click!)", null);
-		addDefault(defaults, Message.SIGN_LINE_3, "&8{0} $", "0: prize");
+		addDefault(defaults, Message.SIGN_LINE_3, "&8{0} $", "0: price");
 		addDefault(defaults, Message.SIGN_LINE_4, "&8{0} days", "0: duration");
 		addDefault(defaults, Message.DATE_FORMAT, "dd/MM/yyyy HH:mm:ss", "Only change this if you know what you are doing..");
 		addDefault(defaults, Message.TIME_REMAINING_FORMAT, "%d days %d h %d min", "Only change this if you know what you are doing..");
