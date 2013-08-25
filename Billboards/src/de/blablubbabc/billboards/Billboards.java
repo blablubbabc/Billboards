@@ -85,6 +85,10 @@ public class Billboards extends JavaPlugin {
 			player.sendMessage(Messages.getMessage(Message.NO_PERMISSION));
 			return true;
 		}
+		if (args.length != 0 && args.length != 2) {
+			return false;
+		}
+		
 		Block block = player.getTargetBlock(null, 10);
 		if (block == null || !(block.getType() == Material.SIGN_POST || block.getType() == Material.WALL_SIGN)) {
 			player.sendMessage(Messages.getMessage(Message.NO_TARGETED_SIGN));
