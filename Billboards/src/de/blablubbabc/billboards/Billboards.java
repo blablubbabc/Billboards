@@ -29,6 +29,10 @@ public class Billboards extends JavaPlugin {
 	public static String PERMISSION_ADMIN = "billboards.admin";
 	public static String PERMISSION_PLAYER = "billboards.rent";
 	
+	public static String trimTo16(String input) {
+		return input.length() != 16 ? input.substring(0, 16) : input;
+	}
+	
 	private int defaultPrice = 10;
 	private int defaultDurationDays = 7;
 	
@@ -52,9 +56,6 @@ public class Billboards extends JavaPlugin {
 		// load config and signs:
 		loadConfig();
 		
-		// refresh signs:
-		refreshAllSigns();
-		
 		// register listener
 		getServer().getPluginManager().registerEvents(new EventListener(), this);
 		
@@ -65,7 +66,7 @@ public class Billboards extends JavaPlugin {
 			public void run() {
 				refreshAllSigns();
 			}
-		}, 20L, 20L * 60 * 10);
+		}, 5L, 20L * 60 * 10);
 	}
 	
 	@Override
@@ -170,7 +171,8 @@ public class Billboards extends JavaPlugin {
 		}
 		
 		Block block = location.getBlock();
-		if (!(block.getState() instanceof Sign)) {
+		Material type = block.getType();
+		if (type != Material.WALL_SIGN && type != Material.SIGN_POST) {
 			logger.warning("Billboard '" + billboard.getLocation().toString() + "' is no longer a sign. Removing this billboard sign.");
 			removeBillboard(billboard);
 			return false;
@@ -189,23 +191,11 @@ public class Billboards extends JavaPlugin {
 		return true;
 	}
 	
-	private void updateText(Billboard billboard, Sign sign) {
-		String line0 = Messages.getMessage(Message.SIGN_LINE_1);
-		if (line0.length() >= 16) line0 = line0.substring(0, 16);
-		
-		String line1 = Messages.getMessage(Message.SIGN_LINE_2);
-		if (line1.length() >= 16) line1 = line1.substring(0, 16);
-		
-		String line2 = Messages.getMessage(Message.SIGN_LINE_3, String.valueOf(billboard.getPrice()));
-		if (line2.length() >= 16) line2 = line2.substring(0, 16);
-		
-		String line3 = Messages.getMessage(Message.SIGN_LINE_4, String.valueOf(billboard.getDurationInDays()));
-		if (line3.length() >= 16) line3 = line3.substring(0, 16);
-		
-		sign.setLine(0, line0);
-		sign.setLine(1, line1);
-		sign.setLine(2, line2);
-		sign.setLine(3, line3);
+	private void updateText(Billboard billboard, Sign sign) {	
+		sign.setLine(0, trimTo16(Messages.getMessage(Message.SIGN_LINE_1)));
+		sign.setLine(1, trimTo16(Messages.getMessage(Message.SIGN_LINE_2)));
+		sign.setLine(2, trimTo16(Messages.getMessage(Message.SIGN_LINE_3, String.valueOf(billboard.getPrice()))));
+		sign.setLine(3, trimTo16(Messages.getMessage(Message.SIGN_LINE_4, String.valueOf(billboard.getDurationInDays()))));
 		sign.update();
 	}
 	

@@ -71,7 +71,7 @@ public class EventListener implements Listener {
 				Billboard billboard = Billboards.instance.getBillboard(clickedBlock.getLocation());
 				if (billboard != null && Billboards.instance.refreshSign(billboard)) {
 					
-					// cancle all block placing against a billboard sign already here:
+					// cancle all block-placing against a billboard sign already here:
 					event.setCancelled(true);
 					
 					if (billboardC != null && billboardC == billboard) {
@@ -82,13 +82,24 @@ public class EventListener implements Listener {
 								// rent:
 								// take money:
 								EconomyResponse response = Billboards.economy.withdrawPlayer(playerName, billboard.getPrice());
-								// transaction successfull ?
+								// transaction successful ?
 								if (response.transactionSuccess()) {
 									player.updateInventory();
+									
 									// set new owner:
 									billboard.setOwner(playerName);
 									billboard.setStartTime(System.currentTimeMillis());
 									Billboards.instance.saveCurrentConfig();
+									
+									// initialize new sign text:
+									Sign sign = (Sign) clickedBlock.getState();
+									
+									sign.setLine(0, Billboards.trimTo16(Messages.getMessage(Message.RENT_SIGN_LINE_1, playerName)));
+									sign.setLine(1, Billboards.trimTo16(Messages.getMessage(Message.RENT_SIGN_LINE_2, playerName)));
+									sign.setLine(2, Billboards.trimTo16(Messages.getMessage(Message.RENT_SIGN_LINE_3, playerName)));
+									sign.setLine(3, Billboards.trimTo16(Messages.getMessage(Message.RENT_SIGN_LINE_4, playerName)));
+									sign.update();
+									
 									player.sendMessage(Messages.getMessage(Message.YOU_HAVE_RENT_A_SIGN, String.valueOf(billboard.getPrice()), String.valueOf(billboard.getDurationInDays())));
 								} else {
 									// something went wrong

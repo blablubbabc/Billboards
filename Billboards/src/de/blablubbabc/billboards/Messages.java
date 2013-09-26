@@ -45,6 +45,10 @@ class Messages {
 		addDefault(defaults, Message.DATE_FORMAT, "dd/MM/yyyy HH:mm:ss", "Only change this if you know what you are doing..");
 		addDefault(defaults, Message.TIME_REMAINING_FORMAT, "%d days %d h %d min", "Only change this if you know what you are doing..");
 		addDefault(defaults, Message.INVALID_NUMBER, "&cInvalid number: {0}", "0: the invalid argument");
+		addDefault(defaults, Message.RENT_SIGN_LINE_1, "&aRent by", "0: playername");
+		addDefault(defaults, Message.RENT_SIGN_LINE_2, "&f{0}", "0: playername");
+		addDefault(defaults, Message.RENT_SIGN_LINE_3, "&cRight-click", "0: playername");
+		addDefault(defaults, Message.RENT_SIGN_LINE_4, "&cwith a sign!", "0: playername");
 		
 		// load the message file
 		FileConfiguration config = YamlConfiguration.loadConfiguration(new File(messagesFilePath));
