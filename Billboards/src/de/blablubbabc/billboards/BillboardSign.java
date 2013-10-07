@@ -2,13 +2,15 @@ package de.blablubbabc.billboards;
 
 public class BillboardSign {
 	private SoftLocation location;
+	private String creator;
 	private String owner;
 	private int durationInDays;
 	private int price;
 	private long startTime;
 	
-	public BillboardSign(SoftLocation location, String owner, int durationInDays, int price, long startTime) {
+	public BillboardSign(SoftLocation location, String creator, String owner, int durationInDays, int price, long startTime) {
 		this.location = location;
+		this.creator = (creator == null || creator.isEmpty()) ? "SERVER" : creator;
 		this.owner = (owner == null || owner.isEmpty()) ? "SERVER" : owner;
 		this.durationInDays = durationInDays;
 		this.price = price;
@@ -23,6 +25,14 @@ public class BillboardSign {
 		this.location = location;
 	}
 
+	public String getCreator() {
+		return creator;
+	}
+	
+	public boolean hasCreator() {
+		return !this.creator.equals("SERVER");
+	}
+	
 	public String getOwner() {
 		return owner;
 	}

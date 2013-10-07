@@ -36,13 +36,16 @@ public class EventListener implements Listener {
 		Block block = event.getBlock();
 		final BillboardSign billboard = Billboards.instance.getBillboard(block.getLocation());
 		if (billboard != null && Billboards.instance.refreshSign(billboard)) {
-			if (player.isSneaking() && player.hasPermission(Billboards.PERMISSION_ADMIN)) {
-				// remove billboard:
-				Billboards.instance.removeBillboard(billboard);
-				player.sendMessage(Messages.getMessage(Message.SIGN_REMOVED));
-			} else {
-				if (!player.hasPermission(Billboards.PERMISSION_ADMIN))player.sendMessage(Messages.getMessage(Message.NO_PERMISSION));
-				else player.sendMessage(Messages.getMessage(Message.YOU_HAVE_TO_SNEAK));
+			boolean breakFailed = false;
+			if (!player.isSneaking()) {
+				breakFailed = true;
+				player.sendMessage(Messages.getMessage(Message.YOU_HAVE_TO_SNEAK));
+			} else if ( !( ( billboard.hasCreator() && billboard.getCreator().equals(player.getName()) ) || player.hasPermission(Billboards.ADMIN_PERMISSION) )) {
+				breakFailed = true;
+				player.sendMessage(Messages.getMessage(Message.NO_PERMISSION));
+			}
+			
+			if (breakFailed) {
 				event.setCancelled(true);
 				Billboards.instance.getServer().getScheduler().runTaskLater(Billboards.instance, new Runnable() {
 					
@@ -52,6 +55,10 @@ public class EventListener implements Listener {
 						Billboards.instance.refreshSign(billboard);
 					}
 				}, 1L);
+			} else {
+				// remove billboard:
+				Billboards.instance.removeBillboard(billboard);
+				player.sendMessage(Messages.getMessage(Message.SIGN_REMOVED));
 			}
 		}
 	}
@@ -115,7 +122,7 @@ public class EventListener implements Listener {
 						}
 					} else {
 						// can rent?
-						if (player.hasPermission(Billboards.PERMISSION_PLAYER)) {
+						if (player.hasPermission(Billboards.RENT_PERMISSION)) {
 							// check if available:
 							if (!billboard.hasOwner()) {
 								// check if player has enough money:
@@ -129,7 +136,7 @@ public class EventListener implements Listener {
 								}
 							} else {
 								// is owner -> edit
-								if (player.getItemInHand().getType() == Material.SIGN && billboard.hasOwner() && (billboard.getOwner().equals(playerName) || player.hasPermission(Billboards.PERMISSION_ADMIN))) {
+								if (player.getItemInHand().getType() == Material.SIGN && billboard.hasOwner() && (billboard.getOwner().equals(playerName) || player.hasPermission(Billboards.ADMIN_PERMISSION))) {
 									// do not cancel, so that the place event is called:
 									event.setCancelled(false);
 								} else {
@@ -182,7 +189,7 @@ public class EventListener implements Listener {
 			// cancle event, so other plugins ignore it and don't print messages for cancelling it:
 			event.setCancelled(true);
 			
-			if (billboard.hasOwner() && (billboard.getOwner().equals(playerName) || player.hasPermission(Billboards.PERMISSION_ADMIN))) {
+			if (billboard.hasOwner() && (billboard.getOwner().equals(playerName) || player.hasPermission(Billboards.ADMIN_PERMISSION))) {
 				edit.put(playerName, new SignEdit(placed.getLocation(), billboard));
 			}
 		}
@@ -216,7 +223,7 @@ public class EventListener implements Listener {
 		if (signEdit != null) {
 			if (Billboards.instance.refreshSign(signEdit.billboard)) {
 				// still owner and has still the permission?
-				if (signEdit.billboard.hasOwner() && (signEdit.billboard.getOwner().equals(playerName) || player.hasPermission(Billboards.PERMISSION_ADMIN)) && player.hasPermission(Billboards.PERMISSION_PLAYER)) {
+				if (signEdit.billboard.hasOwner() && (signEdit.billboard.getOwner().equals(playerName) || player.hasPermission(Billboards.ADMIN_PERMISSION)) && player.hasPermission(Billboards.RENT_PERMISSION)) {
 					Sign target = (Sign) signEdit.billboard.getLocation().getBukkitLocation(Billboards.instance).getBlock().getState();
 					for (int i = 0; i < 4; i++) {
 						target.setLine(i, event.getLine(i));

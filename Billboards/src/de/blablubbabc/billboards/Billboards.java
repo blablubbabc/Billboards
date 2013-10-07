@@ -26,8 +26,9 @@ public class Billboards extends JavaPlugin {
 	public static Billboards instance;
 	public static Logger logger;
 	public static Economy economy = null;
-	public static String PERMISSION_ADMIN = "billboards.admin";
-	public static String PERMISSION_PLAYER = "billboards.rent";
+	public static String ADMIN_PERMISSION = "billboards.admin";
+	public static String RENT_PERMISSION = "billboards.rent";
+	public static String CREATE_PERMISSION = "billboards.create";
 	
 	public static String trimTo16(String input) {
 		return input.length() != 16 ? input.substring(0, 16) : input;
@@ -82,11 +83,11 @@ public class Billboards extends JavaPlugin {
 			return true;
 		}
 		Player player = (Player) sender;
-		if (!player.hasPermission(PERMISSION_ADMIN)) {
+		if (!player.hasPermission(CREATE_PERMISSION)) {
 			player.sendMessage(Messages.getMessage(Message.NO_PERMISSION));
 			return true;
 		}
-		if (args.length != 0 && args.length != 2) {
+		if (args.length > 3) {
 			return false;
 		}
 		
@@ -101,7 +102,8 @@ public class Billboards extends JavaPlugin {
 				int duration = defaultDurationDays;
 				int price = defaultPrice;
 				
-				if (args.length == 2) {
+				// /billboard [<price> <duration>] [creator]
+				if (args.length >= 2) {
 					Integer priceArgument = parseInteger(args[0]);
 					if (priceArgument == null) {
 						player.sendMessage(Messages.getMessage(Message.INVALID_NUMBER, args[0]));
@@ -116,7 +118,14 @@ public class Billboards extends JavaPlugin {
 					duration = durationArgument.intValue();
 				}
 				
-				BillboardSign billboard = new BillboardSign(new SoftLocation(loc.getWorld().getName(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()), null, duration, price, 0);
+				String creator = null;
+				if (args.length == 1) {
+					creator = args[0];
+				} else if (args.length == 3) {
+					creator = args[2];
+				}
+				
+				BillboardSign billboard = new BillboardSign(new SoftLocation(loc.getWorld().getName(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()), creator, null, duration, price, 0);
 				signs.add(billboard);
 				refreshSign(billboard);
 				saveCurrentConfig();
@@ -262,12 +271,13 @@ public class Billboards extends JavaPlugin {
 					continue;
 				}
 				
+				String creator = signSection.getString("Creator", null);
 				String owner = signSection.getString("Owner", null);
 				int durationInDays = signSection.getInt("Duration", defaultDurationDays);
 				int price = signSection.getInt("Price", defaultPrice);
 				long startTime = signSection.getLong("StartTime", 0L);
 				
-				signs.add(new BillboardSign(soft, owner, durationInDays, price, startTime));
+				signs.add(new BillboardSign(soft, creator, owner, durationInDays, price, startTime));
 			}
 		}
 		
@@ -289,6 +299,7 @@ public class Billboards extends JavaPlugin {
 		// then insert current information:
 		for (BillboardSign billboard : signs) {
 			String node = "Signs." + billboard.getLocation().toString();
+			config.set(node + ".Creator", billboard.getCreator());
 			config.set(node + ".Owner", billboard.getOwner());
 			config.set(node + ".Duration", billboard.getDurationInDays());
 			config.set(node + ".Price", billboard.getPrice());
