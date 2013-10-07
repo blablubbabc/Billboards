@@ -185,13 +185,13 @@ public class Billboards extends JavaPlugin {
 		// update text if it has no owner:
 		if (!billboard.hasOwner()) {
 			Sign sign = (Sign) block.getState();
-			updateText(billboard, sign);
+			setRentableText(billboard, sign);
 		}
 		
 		return true;
 	}
 	
-	private void updateText(BillboardSign billboard, Sign sign) {	
+	private void setRentableText(BillboardSign billboard, Sign sign) {	
 		sign.setLine(0, trimTo16(Messages.getMessage(Message.SIGN_LINE_1)));
 		sign.setLine(1, trimTo16(Messages.getMessage(Message.SIGN_LINE_2)));
 		sign.setLine(2, trimTo16(Messages.getMessage(Message.SIGN_LINE_3, String.valueOf(billboard.getPrice()))));
@@ -222,7 +222,7 @@ public class Billboards extends JavaPlugin {
 			// update text if has no owner:
 			if (!billboard.hasOwner()) {
 				Sign sign = (Sign) block.getState();
-				updateText(billboard, sign);
+				setRentableText(billboard, sign);
 			}
 			
 		}
