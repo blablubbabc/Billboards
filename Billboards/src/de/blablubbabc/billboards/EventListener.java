@@ -34,7 +34,7 @@ public class EventListener implements Listener {
 		// only allow breaking if has permission and is sneaking
 		Player player = event.getPlayer();
 		Block block = event.getBlock();
-		final Billboard billboard = Billboards.instance.getBillboard(block.getLocation());
+		final BillboardSign billboard = Billboards.instance.getBillboard(block.getLocation());
 		if (billboard != null && Billboards.instance.refreshSign(billboard)) {
 			if (player.isSneaking() && player.hasPermission(Billboards.PERMISSION_ADMIN)) {
 				// remove billboard:
@@ -65,10 +65,10 @@ public class EventListener implements Listener {
 		
 		if (clickedBlock != null && event.getAction() == Action.RIGHT_CLICK_BLOCK) {
 			
-			Billboard billboardC = Billboards.instance.customers.remove(playerName);
+			BillboardSign billboardC = Billboards.instance.customers.remove(playerName);
 			
 			if (clickedBlock.getType() == Material.SIGN_POST || clickedBlock.getType() == Material.WALL_SIGN) {
-				Billboard billboard = Billboards.instance.getBillboard(clickedBlock.getLocation());
+				BillboardSign billboard = Billboards.instance.getBillboard(clickedBlock.getLocation());
 				if (billboard != null && Billboards.instance.refreshSign(billboard)) {
 					
 					// cancle all block-placing against a billboard sign already here:
@@ -173,7 +173,7 @@ public class EventListener implements Listener {
 		
 		if (!(typeAgainst == Material.WALL_SIGN || typeAgainst == Material.SIGN_POST)) return;
 		
-		Billboard billboard = Billboards.instance.getBillboard(against.getLocation());
+		BillboardSign billboard = Billboards.instance.getBillboard(against.getLocation());
 		
 		if (billboard != null) {
 			Player player = event.getPlayer();

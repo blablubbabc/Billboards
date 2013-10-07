@@ -36,9 +36,9 @@ public class Billboards extends JavaPlugin {
 	private int defaultPrice = 10;
 	private int defaultDurationDays = 7;
 	
-	public Map<String, Billboard> customers = new HashMap<String, Billboard>();
+	public Map<String, BillboardSign> customers = new HashMap<String, BillboardSign>();
 	
-	private List<Billboard> signs = new ArrayList<Billboard>();
+	private List<BillboardSign> signs = new ArrayList<BillboardSign>();
 	
 	@Override
 	public void onEnable() {
@@ -116,7 +116,7 @@ public class Billboards extends JavaPlugin {
 					duration = durationArgument.intValue();
 				}
 				
-				Billboard billboard = new Billboard(new SoftLocation(loc.getWorld().getName(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()), null, duration, price, 0);
+				BillboardSign billboard = new BillboardSign(new SoftLocation(loc.getWorld().getName(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()), null, duration, price, 0);
 				signs.add(billboard);
 				refreshSign(billboard);
 				saveCurrentConfig();
@@ -144,20 +144,20 @@ public class Billboards extends JavaPlugin {
 		return (economy != null);
 	}
 	
-	public void removeBillboard(Billboard billboard) {
+	public void removeBillboard(BillboardSign billboard) {
 		signs.remove(billboard);
 		saveCurrentConfig();
 	}
 	
-	public Billboard getBillboard(Location loc) {
-		for (Billboard billboard : signs) {
+	public BillboardSign getBillboard(Location loc) {
+		for (BillboardSign billboard : signs) {
 			if (billboard.getLocation().isSameLocation(loc)) return billboard;
 		}
 		return null;
 	}
 	
 	// return true if the sign is still valid
-	public boolean refreshSign(Billboard billboard) {
+	public boolean refreshSign(BillboardSign billboard) {
 		if (!signs.contains(billboard)) {
 			logger.warning("Billboard '" + billboard.getLocation().toString() + "' is no longer an valid billboard sign, but was refreshed.");
 			return false;
@@ -178,11 +178,11 @@ public class Billboards extends JavaPlugin {
 			return false;
 		}
 		
-		// check rent time if has owner:
+		// check rent time if it has an owner:
 		if (billboard.hasOwner() && billboard.isRentOver()) {
 			billboard.resetOwner();
 		}
-		// update text if has no owner:
+		// update text if it has no owner:
 		if (!billboard.hasOwner()) {
 			Sign sign = (Sign) block.getState();
 			updateText(billboard, sign);
@@ -191,7 +191,7 @@ public class Billboards extends JavaPlugin {
 		return true;
 	}
 	
-	private void updateText(Billboard billboard, Sign sign) {	
+	private void updateText(BillboardSign billboard, Sign sign) {	
 		sign.setLine(0, trimTo16(Messages.getMessage(Message.SIGN_LINE_1)));
 		sign.setLine(1, trimTo16(Messages.getMessage(Message.SIGN_LINE_2)));
 		sign.setLine(2, trimTo16(Messages.getMessage(Message.SIGN_LINE_3, String.valueOf(billboard.getPrice()))));
@@ -200,8 +200,8 @@ public class Billboards extends JavaPlugin {
 	}
 	
 	public void refreshAllSigns() {
-		List<Billboard> forRemoval = new ArrayList<Billboard>();
-		for (Billboard billboard : signs) {
+		List<BillboardSign> forRemoval = new ArrayList<BillboardSign>();
+		for (BillboardSign billboard : signs) {
 			Location location = billboard.getLocation().getBukkitLocation(this);
 			if (location == null) {
 				logger.warning("World '" + billboard.getLocation().getWorldName() + "' not found. Removing this billboard sign.");
@@ -228,7 +228,7 @@ public class Billboards extends JavaPlugin {
 		}
 		// remove invalid billboards:
 		if (forRemoval.size() > 0) {
-			for (Billboard billboard : forRemoval) {
+			for (BillboardSign billboard : forRemoval) {
 				signs.remove(billboard);
 			}
 			saveCurrentConfig();
@@ -267,7 +267,7 @@ public class Billboards extends JavaPlugin {
 				int price = signSection.getInt("Price", defaultPrice);
 				long startTime = signSection.getLong("StartTime", 0L);
 				
-				signs.add(new Billboard(soft, owner, durationInDays, price, startTime));
+				signs.add(new BillboardSign(soft, owner, durationInDays, price, startTime));
 			}
 		}
 		
@@ -287,7 +287,7 @@ public class Billboards extends JavaPlugin {
 		// first clear signs section:
 		config.set("Signs", null);
 		// then insert current information:
-		for (Billboard billboard : signs) {
+		for (BillboardSign billboard : signs) {
 			String node = "Signs." + billboard.getLocation().toString();
 			config.set(node + ".Owner", billboard.getOwner());
 			config.set(node + ".Duration", billboard.getDurationInDays());
