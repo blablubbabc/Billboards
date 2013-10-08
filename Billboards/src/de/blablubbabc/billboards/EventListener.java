@@ -81,6 +81,17 @@ public class EventListener implements Listener {
 					// cancle all block-placing against a billboard sign already here:
 					event.setCancelled(true);
 					
+					// can rent?
+					if (!player.hasPermission(Billboards.RENT_PERMISSION)) {
+						player.sendMessage(Messages.getMessage(Message.NO_PERMISSION));
+						return;
+					}
+					// own sign?
+					if (billboard.getCreator().equals(playerName)) {
+						player.sendMessage(Messages.getMessage(Message.CANT_RENT_OWN_SIGN));
+						return;
+					}
+					
 					if (billboardC != null && billboardC == billboard) {
 						// check if it's still available:
 						if (!billboard.hasOwner()) {
@@ -123,47 +134,42 @@ public class EventListener implements Listener {
 							player.sendMessage(Messages.getMessage(Message.NO_LONGER_AVAILABLE));
 						}
 					} else {
-						// can rent?
-						if (player.hasPermission(Billboards.RENT_PERMISSION)) {
-							// check if available:
-							if (!billboard.hasOwner()) {
-								// check if player has enough money:
-								if (Billboards.economy.has(playerName, billboard.getPrice())) {
-									// click again to rent:
-									player.sendMessage(Messages.getMessage(Message.CLICK_TO_RENT, String.valueOf(billboard.getPrice()), String.valueOf(billboard.getDurationInDays()), billboard.getCreator()));
-									Billboards.instance.customers.put(playerName, billboard);
-								} else {
-									// no enough money:
-									player.sendMessage(Messages.getMessage(Message.NOT_ENOUGH_MONEY, String.valueOf(billboard.getPrice()), String.valueOf(Billboards.economy.getBalance(playerName))));
-								}
+						// check if available:
+						if (!billboard.hasOwner()) {
+							// check if player has enough money:
+							if (Billboards.economy.has(playerName, billboard.getPrice())) {
+								// click again to rent:
+								player.sendMessage(Messages.getMessage(Message.CLICK_TO_RENT, String.valueOf(billboard.getPrice()), String.valueOf(billboard.getDurationInDays()), billboard.getCreator()));
+								Billboards.instance.customers.put(playerName, billboard);
 							} else {
-								// is owner -> edit
-								if (player.getItemInHand().getType() == Material.SIGN && billboard.hasOwner() && (billboard.getOwner().equals(playerName) || player.hasPermission(Billboards.ADMIN_PERMISSION))) {
-									// do not cancel, so that the place event is called:
-									event.setCancelled(false);
-								} else {
-									// print information of sign:
-									player.sendMessage(Messages.getMessage(Message.INFO_HEADER));
-									player.sendMessage(Messages.getMessage(Message.INFO_CREATOR, billboard.getCreator()));
-									player.sendMessage(Messages.getMessage(Message.INFO_OWNER, billboard.getOwner()));
-									player.sendMessage(Messages.getMessage(Message.INFO_PRICE, String.valueOf(billboard.getPrice())));
-									player.sendMessage(Messages.getMessage(Message.INFO_DURATION, String.valueOf(billboard.getDurationInDays())));
-									player.sendMessage(Messages.getMessage(Message.INFO_RENT_SINCE, dateFormat.format(new Date(billboard.getStartTime()))));
-									
-									long endTime = billboard.getEndTime();
-									player.sendMessage(Messages.getMessage(Message.INFO_RENT_UNTIL, dateFormat.format(new Date(endTime))));
-									
-									long left = endTime - System.currentTimeMillis();
-									long days = TimeUnit.MILLISECONDS.toDays(left);
-									long hours = TimeUnit.MILLISECONDS.toHours(left) - TimeUnit.DAYS.toHours(days);
-									long minutes = TimeUnit.MILLISECONDS.toMinutes(left) - TimeUnit.DAYS.toMinutes(days) - TimeUnit.HOURS.toMinutes(hours);
-									String timeLeft = String.format(Messages.getMessage(Message.TIME_REMAINING_FORMAT), days, hours, minutes);
-									
-									player.sendMessage(Messages.getMessage(Message.INFO_TIME_LEFT, timeLeft));
-								}
+								// no enough money:
+								player.sendMessage(Messages.getMessage(Message.NOT_ENOUGH_MONEY, String.valueOf(billboard.getPrice()), String.valueOf(Billboards.economy.getBalance(playerName))));
 							}
 						} else {
-							player.sendMessage(Messages.getMessage(Message.NO_PERMISSION));
+							// is owner -> edit
+							if (player.getItemInHand().getType() == Material.SIGN && billboard.hasOwner() && (billboard.getOwner().equals(playerName) || player.hasPermission(Billboards.ADMIN_PERMISSION))) {
+								// do not cancel, so that the place event is called:
+								event.setCancelled(false);
+							} else {
+								// print information of sign:
+								player.sendMessage(Messages.getMessage(Message.INFO_HEADER));
+								player.sendMessage(Messages.getMessage(Message.INFO_CREATOR, billboard.getCreator()));
+								player.sendMessage(Messages.getMessage(Message.INFO_OWNER, billboard.getOwner()));
+								player.sendMessage(Messages.getMessage(Message.INFO_PRICE, String.valueOf(billboard.getPrice())));
+								player.sendMessage(Messages.getMessage(Message.INFO_DURATION, String.valueOf(billboard.getDurationInDays())));
+								player.sendMessage(Messages.getMessage(Message.INFO_RENT_SINCE, dateFormat.format(new Date(billboard.getStartTime()))));
+								
+								long endTime = billboard.getEndTime();
+								player.sendMessage(Messages.getMessage(Message.INFO_RENT_UNTIL, dateFormat.format(new Date(endTime))));
+								
+								long left = endTime - System.currentTimeMillis();
+								long days = TimeUnit.MILLISECONDS.toDays(left);
+								long hours = TimeUnit.MILLISECONDS.toHours(left) - TimeUnit.DAYS.toHours(days);
+								long minutes = TimeUnit.MILLISECONDS.toMinutes(left) - TimeUnit.DAYS.toMinutes(days) - TimeUnit.HOURS.toMinutes(hours);
+								String timeLeft = String.format(Messages.getMessage(Message.TIME_REMAINING_FORMAT), days, hours, minutes);
+								
+								player.sendMessage(Messages.getMessage(Message.INFO_TIME_LEFT, timeLeft));
+							}
 						}
 					}
 				}
