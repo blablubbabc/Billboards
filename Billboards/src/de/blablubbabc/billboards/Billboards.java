@@ -31,7 +31,7 @@ public class Billboards extends JavaPlugin {
 	public static String CREATE_PERMISSION = "billboards.create";
 	
 	public static String trimTo16(String input) {
-		return input.length() != 16 ? input.substring(0, 16) : input;
+		return input.length() > 16 ? input.substring(0, 16) : input;
 	}
 	
 	private int defaultPrice = 10;
