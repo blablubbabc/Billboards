@@ -83,56 +83,62 @@ public class Billboards extends JavaPlugin {
 			return true;
 		}
 		Player player = (Player) sender;
-		if (!player.hasPermission(CREATE_PERMISSION)) {
+		boolean hasAdminPermission = player.hasPermission(ADMIN_PERMISSION);
+		if (hasAdminPermission || player.hasPermission(CREATE_PERMISSION)) {
+			if (args.length > 3) {
+				return false;
+			}
+			
+			Block block = player.getTargetBlock(null, 10);
+			if (block == null || !(block.getType() == Material.SIGN_POST || block.getType() == Material.WALL_SIGN)) {
+				player.sendMessage(Messages.getMessage(Message.NO_TARGETED_SIGN));
+			} else {
+				Location loc = block.getLocation();
+				if (getBillboard(loc) != null) {
+					player.sendMessage(Messages.getMessage(Message.ALREADY_BILLBOARD_SIGN));
+				} else {
+					int duration = defaultDurationDays;
+					int price = defaultPrice;
+					
+					// /billboard [<price> <duration>] [creator]
+					if (args.length >= 2) {
+						Integer priceArgument = parseInteger(args[0]);
+						if (priceArgument == null) {
+							player.sendMessage(Messages.getMessage(Message.INVALID_NUMBER, args[0]));
+							return true;
+						}
+						Integer durationArgument = parseInteger(args[1]);
+						if (durationArgument == null) {
+							player.sendMessage(Messages.getMessage(Message.INVALID_NUMBER, args[1]));
+							return true;
+						}
+						price = priceArgument.intValue();
+						duration = durationArgument.intValue();
+					}
+					
+					String creator = hasAdminPermission ? null : player.getName();
+					
+					if (args.length == 1 || args.length == 3) {
+						if (hasAdminPermission) {
+							creator = args[args.length == 1 ? 0 : 2];
+						} else {
+							player.sendMessage(Messages.getMessage(Message.NO_PERMISSION));
+							return true;
+						}
+					}
+					
+					BillboardSign billboard = new BillboardSign(new SoftLocation(loc.getWorld().getName(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()), creator, null, duration, price, 0);
+					signs.add(billboard);
+					refreshSign(billboard);
+					saveCurrentConfig();
+					
+					player.sendMessage(Messages.getMessage(Message.ADDED_SIGN, String.valueOf(price), String.valueOf(duration), billboard.getCreator()));
+				}
+			}
+		} else {
 			player.sendMessage(Messages.getMessage(Message.NO_PERMISSION));
-			return true;
-		}
-		if (args.length > 3) {
-			return false;
 		}
 		
-		Block block = player.getTargetBlock(null, 10);
-		if (block == null || !(block.getType() == Material.SIGN_POST || block.getType() == Material.WALL_SIGN)) {
-			player.sendMessage(Messages.getMessage(Message.NO_TARGETED_SIGN));
-		} else {
-			Location loc = block.getLocation();
-			if (getBillboard(loc) != null) {
-				player.sendMessage(Messages.getMessage(Message.ALREADY_BILLBOARD_SIGN));
-			} else {
-				int duration = defaultDurationDays;
-				int price = defaultPrice;
-				
-				// /billboard [<price> <duration>] [creator]
-				if (args.length >= 2) {
-					Integer priceArgument = parseInteger(args[0]);
-					if (priceArgument == null) {
-						player.sendMessage(Messages.getMessage(Message.INVALID_NUMBER, args[0]));
-						return true;
-					}
-					Integer durationArgument = parseInteger(args[1]);
-					if (durationArgument == null) {
-						player.sendMessage(Messages.getMessage(Message.INVALID_NUMBER, args[1]));
-						return true;
-					}
-					price = priceArgument.intValue();
-					duration = durationArgument.intValue();
-				}
-				
-				String creator = null;
-				if (args.length == 1) {
-					creator = args[0];
-				} else if (args.length == 3) {
-					creator = args[2];
-				}
-				
-				BillboardSign billboard = new BillboardSign(new SoftLocation(loc.getWorld().getName(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()), creator, null, duration, price, 0);
-				signs.add(billboard);
-				refreshSign(billboard);
-				saveCurrentConfig();
-				
-				player.sendMessage(Messages.getMessage(Message.ADDED_SIGN, String.valueOf(price), String.valueOf(duration), billboard.getCreator()));
-			}
-		}
 		return true;
 	}
 	
