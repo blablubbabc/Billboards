@@ -130,7 +130,7 @@ public class Billboards extends JavaPlugin {
 				refreshSign(billboard);
 				saveCurrentConfig();
 				
-				player.sendMessage(Messages.getMessage(Message.ADDED_SIGN));
+				player.sendMessage(Messages.getMessage(Message.ADDED_SIGN, String.valueOf(price), String.valueOf(duration), billboard.getCreator()));
 			}
 		}
 		return true;
@@ -200,11 +200,13 @@ public class Billboards extends JavaPlugin {
 		return true;
 	}
 	
-	private void setRentableText(BillboardSign billboard, Sign sign) {	
-		sign.setLine(0, trimTo16(Messages.getMessage(Message.SIGN_LINE_1)));
-		sign.setLine(1, trimTo16(Messages.getMessage(Message.SIGN_LINE_2)));
-		sign.setLine(2, trimTo16(Messages.getMessage(Message.SIGN_LINE_3, String.valueOf(billboard.getPrice()))));
-		sign.setLine(3, trimTo16(Messages.getMessage(Message.SIGN_LINE_4, String.valueOf(billboard.getDurationInDays()))));
+	private void setRentableText(BillboardSign billboard, Sign sign) {
+		String[] args = new String[] {String.valueOf(billboard.getPrice()), String.valueOf(billboard.getDurationInDays()), billboard.getCreator()};
+		
+		sign.setLine(0, trimTo16(Messages.getMessage(Message.SIGN_LINE_1, args)));
+		sign.setLine(1, trimTo16(Messages.getMessage(Message.SIGN_LINE_2, args)));
+		sign.setLine(2, trimTo16(Messages.getMessage(Message.SIGN_LINE_3, args)));
+		sign.setLine(3, trimTo16(Messages.getMessage(Message.SIGN_LINE_4, args)));
 		sign.update();
 	}
 	

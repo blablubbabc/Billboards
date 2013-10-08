@@ -19,9 +19,9 @@ class Messages {
 		HashMap<String, CustomizableMessage> defaults = new HashMap<String, CustomizableMessage>();
 		
 		// initialize default messages
-		addDefault(defaults, Message.YOU_HAVE_TO_SNEAK, "&7You have to sneak for this.", null);
+		addDefault(defaults, Message.YOU_HAVE_TO_SNEAK, "&7You have to sneak to remove this.", null);
 		addDefault(defaults, Message.SIGN_REMOVED, "&aBillboard sign was removed.", null);
-		addDefault(defaults, Message.ADDED_SIGN, "&aThis sign can now be rented.", null);
+		addDefault(defaults, Message.ADDED_SIGN, "&aThis sign can now be rented from &f{2} &afor &8{0} $ &afor &8{1} days&a.", "0: price  1: duration  2: creator");
 		addDefault(defaults, Message.ALREADY_BILLBOARD_SIGN, "&7This sign is already a billboard sign.", null);
 		addDefault(defaults, Message.NO_TARGETED_SIGN, "&7You have to target a sign.", null);
 		addDefault(defaults, Message.ONLY_AS_PLAYER, "This only works as player.", null);
@@ -33,23 +33,23 @@ class Messages {
 		addDefault(defaults, Message.INFO_RENT_SINCE, "&5Rented since: &2{0}", "0: since date");
 		addDefault(defaults, Message.INFO_RENT_UNTIL, "&5Rented until: &2{0}", "0: until date");
 		addDefault(defaults, Message.INFO_TIME_LEFT, "&5Time remaining: &2{0}", "0: time left");
-		addDefault(defaults, Message.CLICK_TO_RENT, "&6Click the sign again, to rent it for &8{0} $ &6for &8{1} days&6.", "0: price  1: duration");
-		addDefault(defaults, Message.YOU_HAVE_RENT_A_SIGN, "&aYou have rented this sign now for &8{1} days &a. \nTo edit it: right-click it with a sign", "0: price  1: duration");
+		addDefault(defaults, Message.CLICK_TO_RENT, "&6Click the sign again, to rent it from &8{2} &6for &b{0} $ &6for &b{1} days&6.", "0: price  1: duration  2: creator");
+		addDefault(defaults, Message.YOU_HAVE_RENT_A_SIGN, "&aYou have rented this sign now from &8{2} &6for &b{1} days &a. \nTo edit it: right-click it with a sign", "0: price  1: duration  2: creator");
 		addDefault(defaults, Message.TRANSACTION_FAILURE, "&cSomething went wrong: {0}", "0: errorMessage");
 		addDefault(defaults, Message.NO_LONGER_AVAILABLE, "&cThis sign is no longer available!", null);
 		addDefault(defaults, Message.NOT_ENOUGH_MONEY, "&cYou have not enough money! \nYou need &8{0} $&c, but you only have &8{1} $&c!", "0: price  1: balance");
 		addDefault(defaults, Message.NO_PERMISSION, "&cYou have no permission for that.", null);
-		addDefault(defaults, Message.SIGN_LINE_1, "&3RENT ME", null);
-		addDefault(defaults, Message.SIGN_LINE_2, "&5(click!)", null);
-		addDefault(defaults, Message.SIGN_LINE_3, "&8{0} $", "0: price");
-		addDefault(defaults, Message.SIGN_LINE_4, "&8{0} days", "0: duration");
+		addDefault(defaults, Message.SIGN_LINE_1, "&3RENT ME", "0: price  1: duration  2: creator");
+		addDefault(defaults, Message.SIGN_LINE_2, "&5(click!)", "0: price  1: duration  2: creator");
+		addDefault(defaults, Message.SIGN_LINE_3, "&8{0} $", "0: price  1: duration  2: creator");
+		addDefault(defaults, Message.SIGN_LINE_4, "&8{1} days", "0: price  1: duration  2: creator");
 		addDefault(defaults, Message.DATE_FORMAT, "dd/MM/yyyy HH:mm:ss", "Only change this if you know what you are doing..");
 		addDefault(defaults, Message.TIME_REMAINING_FORMAT, "%d days %d h %d min", "Only change this if you know what you are doing..");
 		addDefault(defaults, Message.INVALID_NUMBER, "&cInvalid number: {0}", "0: the invalid argument");
-		addDefault(defaults, Message.RENT_SIGN_LINE_1, "&aRent by", "0: playername");
-		addDefault(defaults, Message.RENT_SIGN_LINE_2, "&f{0}", "0: playername");
-		addDefault(defaults, Message.RENT_SIGN_LINE_3, "&cRight-click", "0: playername");
-		addDefault(defaults, Message.RENT_SIGN_LINE_4, "&cwith a sign!", "0: playername");
+		addDefault(defaults, Message.RENT_SIGN_LINE_1, "&aRent by", "0: price  1: duration  2: creator 3: new owner");
+		addDefault(defaults, Message.RENT_SIGN_LINE_2, "&f{0}", "0: price  1: duration  2: creator 3: new owner");
+		addDefault(defaults, Message.RENT_SIGN_LINE_3, "&cRight-click", "0: price  1: duration  2: creator 3: new owner");
+		addDefault(defaults, Message.RENT_SIGN_LINE_4, "&cwith a sign!", "0: price  1: duration  2: creator 3: new owner");
 		
 		// load the message file
 		FileConfiguration config = YamlConfiguration.loadConfiguration(new File(messagesFilePath));

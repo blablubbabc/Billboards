@@ -101,13 +101,15 @@ public class EventListener implements Listener {
 									// initialize new sign text:
 									Sign sign = (Sign) clickedBlock.getState();
 									
-									sign.setLine(0, Billboards.trimTo16(Messages.getMessage(Message.RENT_SIGN_LINE_1, playerName)));
-									sign.setLine(1, Billboards.trimTo16(Messages.getMessage(Message.RENT_SIGN_LINE_2, playerName)));
-									sign.setLine(2, Billboards.trimTo16(Messages.getMessage(Message.RENT_SIGN_LINE_3, playerName)));
-									sign.setLine(3, Billboards.trimTo16(Messages.getMessage(Message.RENT_SIGN_LINE_4, playerName)));
+									String[] args = new String[] {String.valueOf(billboard.getPrice()), String.valueOf(billboard.getDurationInDays()), billboard.getCreator(), playerName};
+									
+									sign.setLine(0, Billboards.trimTo16(Messages.getMessage(Message.RENT_SIGN_LINE_1, args)));
+									sign.setLine(1, Billboards.trimTo16(Messages.getMessage(Message.RENT_SIGN_LINE_2, args)));
+									sign.setLine(2, Billboards.trimTo16(Messages.getMessage(Message.RENT_SIGN_LINE_3, args)));
+									sign.setLine(3, Billboards.trimTo16(Messages.getMessage(Message.RENT_SIGN_LINE_4, args)));
 									sign.update();
 									
-									player.sendMessage(Messages.getMessage(Message.YOU_HAVE_RENT_A_SIGN, String.valueOf(billboard.getPrice()), String.valueOf(billboard.getDurationInDays())));
+									player.sendMessage(Messages.getMessage(Message.YOU_HAVE_RENT_A_SIGN, String.valueOf(billboard.getPrice()), String.valueOf(billboard.getDurationInDays()), billboard.getCreator()));
 								} else {
 									// something went wrong
 									player.sendMessage(Messages.getMessage(Message.TRANSACTION_FAILURE, response.errorMessage));
@@ -128,7 +130,7 @@ public class EventListener implements Listener {
 								// check if player has enough money:
 								if (Billboards.economy.has(playerName, billboard.getPrice())) {
 									// click again to rent:
-									player.sendMessage(Messages.getMessage(Message.CLICK_TO_RENT, String.valueOf(billboard.getPrice()), String.valueOf(billboard.getDurationInDays())));
+									player.sendMessage(Messages.getMessage(Message.CLICK_TO_RENT, String.valueOf(billboard.getPrice()), String.valueOf(billboard.getDurationInDays()), billboard.getCreator()));
 									Billboards.instance.customers.put(playerName, billboard);
 								} else {
 									// no enough money:
