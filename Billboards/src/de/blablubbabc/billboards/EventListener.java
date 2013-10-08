@@ -142,6 +142,7 @@ public class EventListener implements Listener {
 								} else {
 									// print information of sign:
 									player.sendMessage(Messages.getMessage(Message.INFO_HEADER));
+									player.sendMessage(Messages.getMessage(Message.INFO_CREATOR, billboard.getCreator()));
 									player.sendMessage(Messages.getMessage(Message.INFO_OWNER, billboard.getOwner()));
 									player.sendMessage(Messages.getMessage(Message.INFO_PRICE, String.valueOf(billboard.getPrice())));
 									player.sendMessage(Messages.getMessage(Message.INFO_DURATION, String.valueOf(billboard.getDurationInDays())));

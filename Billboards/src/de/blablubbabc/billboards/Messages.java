@@ -26,6 +26,7 @@ class Messages {
 		addDefault(defaults, Message.NO_TARGETED_SIGN, "&7You have to target a sign.", null);
 		addDefault(defaults, Message.ONLY_AS_PLAYER, "This only works as player.", null);
 		addDefault(defaults, Message.INFO_HEADER, "&3Billboard - Information", null);
+		addDefault(defaults, Message.INFO_CREATOR, "&5Creator: &2{0}", "0: creator");
 		addDefault(defaults, Message.INFO_OWNER, "&5Owner: &2{0}", "0: owner");
 		addDefault(defaults, Message.INFO_PRICE, "&5Price: &2{0} $", "0: price");
 		addDefault(defaults, Message.INFO_DURATION, "&5Duration: &2{0} days", "0: duration");
