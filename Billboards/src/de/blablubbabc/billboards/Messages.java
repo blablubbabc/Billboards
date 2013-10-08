@@ -39,8 +39,8 @@ class Messages {
 		addDefault(defaults, Message.NO_LONGER_AVAILABLE, "&cThis sign is no longer available!", null);
 		addDefault(defaults, Message.NOT_ENOUGH_MONEY, "&cYou have not enough money! \nYou need &8{0} $&c, but you only have &8{1} $&c!", "0: price  1: balance");
 		addDefault(defaults, Message.NO_PERMISSION, "&cYou have no permission for that.", null);
-		addDefault(defaults, Message.SIGN_LINE_1, "&3RENT ME", "0: price  1: duration  2: creator");
-		addDefault(defaults, Message.SIGN_LINE_2, "&5(click!)", "0: price  1: duration  2: creator");
+		addDefault(defaults, Message.SIGN_LINE_1, "&bRENT ME", "0: price  1: duration  2: creator");
+		addDefault(defaults, Message.SIGN_LINE_2, "&f(click!)", "0: price  1: duration  2: creator");
 		addDefault(defaults, Message.SIGN_LINE_3, "&8{0} $", "0: price  1: duration  2: creator");
 		addDefault(defaults, Message.SIGN_LINE_4, "&8{1} days", "0: price  1: duration  2: creator");
 		addDefault(defaults, Message.DATE_FORMAT, "dd/MM/yyyy HH:mm:ss", "Only change this if you know what you are doing..");
