@@ -15,7 +15,7 @@ permissions:
     default: true
   billboards.create:
     description: Can create own billboard signs.
-    default: true
+    default: false
   billboards.admin:
     description: Can add and remove all billboard signs.
     default: op
