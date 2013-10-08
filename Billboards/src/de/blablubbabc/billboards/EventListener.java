@@ -112,13 +112,13 @@ public class EventListener implements Listener {
 									EconomyResponse deposit = Billboards.economy.depositPlayer(billboard.getCreator(), billboard.getPrice());
 									// transaction successful ?
 									if (!deposit.transactionSuccess()) {
-										// something went wrong -> this is really bad
+										// something went wrong  :(
 										player.sendMessage(Messages.getMessage(Message.TRANSACTION_FAILURE, deposit.errorMessage));
 										
-										// try to undo withdraw:
+										// try to refund the withdraw
 										EconomyResponse withdrawUndo = Billboards.economy.depositPlayer(playerName, withdraw.amount);
 										if (!withdrawUndo.transactionSuccess()) {
-											// this is even worse:
+											// this is really bad:
 											player.sendMessage(Messages.getMessage(Message.TRANSACTION_FAILURE, withdrawUndo.errorMessage));
 										}
 										player.updateInventory();
