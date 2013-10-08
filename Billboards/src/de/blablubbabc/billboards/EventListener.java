@@ -99,32 +99,52 @@ public class EventListener implements Listener {
 							if (Billboards.economy.has(playerName, billboard.getPrice())) {
 								// rent:
 								// take money:
-								EconomyResponse response = Billboards.economy.withdrawPlayer(playerName, billboard.getPrice());
+								EconomyResponse withdraw = Billboards.economy.withdrawPlayer(playerName, billboard.getPrice());
 								// transaction successful ?
-								if (response.transactionSuccess()) {
-									player.updateInventory();
-									
-									// set new owner:
-									billboard.setOwner(playerName);
-									billboard.setStartTime(System.currentTimeMillis());
-									Billboards.instance.saveCurrentConfig();
-									
-									// initialize new sign text:
-									Sign sign = (Sign) clickedBlock.getState();
-									
-									String[] args = new String[] {String.valueOf(billboard.getPrice()), String.valueOf(billboard.getDurationInDays()), billboard.getCreator(), playerName};
-									
-									sign.setLine(0, Billboards.trimTo16(Messages.getMessage(Message.RENT_SIGN_LINE_1, args)));
-									sign.setLine(1, Billboards.trimTo16(Messages.getMessage(Message.RENT_SIGN_LINE_2, args)));
-									sign.setLine(2, Billboards.trimTo16(Messages.getMessage(Message.RENT_SIGN_LINE_3, args)));
-									sign.setLine(3, Billboards.trimTo16(Messages.getMessage(Message.RENT_SIGN_LINE_4, args)));
-									sign.update();
-									
-									player.sendMessage(Messages.getMessage(Message.YOU_HAVE_RENT_A_SIGN, String.valueOf(billboard.getPrice()), String.valueOf(billboard.getDurationInDays()), billboard.getCreator()));
-								} else {
+								if (!withdraw.transactionSuccess()) {
 									// something went wrong
-									player.sendMessage(Messages.getMessage(Message.TRANSACTION_FAILURE, response.errorMessage));
+									player.sendMessage(Messages.getMessage(Message.TRANSACTION_FAILURE, withdraw.errorMessage));
+									return;
 								}
+								
+								if (billboard.hasCreator()) {
+									// give money to the creator:
+									EconomyResponse deposit = Billboards.economy.depositPlayer(billboard.getCreator(), billboard.getPrice());
+									// transaction successful ?
+									if (!deposit.transactionSuccess()) {
+										// something went wrong -> this is really bad
+										player.sendMessage(Messages.getMessage(Message.TRANSACTION_FAILURE, deposit.errorMessage));
+										
+										// try to undo withdraw:
+										EconomyResponse withdrawUndo = Billboards.economy.depositPlayer(playerName, withdraw.amount);
+										if (!withdrawUndo.transactionSuccess()) {
+											// this is even worse:
+											player.sendMessage(Messages.getMessage(Message.TRANSACTION_FAILURE, withdrawUndo.errorMessage));
+										}
+										player.updateInventory();
+										return;
+									}
+								}
+
+								player.updateInventory();
+
+								// set new owner:
+								billboard.setOwner(playerName);
+								billboard.setStartTime(System.currentTimeMillis());
+								Billboards.instance.saveCurrentConfig();
+
+								// initialize new sign text:
+								Sign sign = (Sign) clickedBlock.getState();
+
+								String[] args = new String[] { String.valueOf(billboard.getPrice()), String.valueOf(billboard.getDurationInDays()), billboard.getCreator(), playerName };
+
+								sign.setLine(0, Billboards.trimTo16(Messages.getMessage(Message.RENT_SIGN_LINE_1, args)));
+								sign.setLine(1, Billboards.trimTo16(Messages.getMessage(Message.RENT_SIGN_LINE_2, args)));
+								sign.setLine(2, Billboards.trimTo16(Messages.getMessage(Message.RENT_SIGN_LINE_3, args)));
+								sign.setLine(3, Billboards.trimTo16(Messages.getMessage(Message.RENT_SIGN_LINE_4, args)));
+								sign.update();
+									
+								player.sendMessage(Messages.getMessage(Message.YOU_HAVE_RENT_A_SIGN, String.valueOf(billboard.getPrice()), String.valueOf(billboard.getDurationInDays()), billboard.getCreator()));
 							} else {
 								// not enough money:
 								player.sendMessage(Messages.getMessage(Message.NOT_ENOUGH_MONEY, String.valueOf(billboard.getPrice()), String.valueOf(Billboards.economy.getBalance(playerName))));
