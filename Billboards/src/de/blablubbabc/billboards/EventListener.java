@@ -25,7 +25,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 
 public class EventListener implements Listener {
-	
+
 	private Map<String, SignEdit> edit = new HashMap<String, SignEdit>();
 	private SimpleDateFormat dateFormat = new SimpleDateFormat(Messages.getMessage(Message.DATE_FORMAT));
 
@@ -40,15 +40,15 @@ public class EventListener implements Listener {
 			if (!player.isSneaking()) {
 				breakFailed = true;
 				player.sendMessage(Messages.getMessage(Message.YOU_HAVE_TO_SNEAK));
-			} else if ( !( ( billboard.hasCreator() && billboard.getCreator().equals(player.getName()) ) || player.hasPermission(Billboards.ADMIN_PERMISSION) )) {
+			} else if (!((billboard.hasCreator() && billboard.getCreator().equals(player.getName())) || player.hasPermission(Billboards.ADMIN_PERMISSION))) {
 				breakFailed = true;
 				player.sendMessage(Messages.getMessage(Message.NO_PERMISSION));
 			}
-			
+
 			if (breakFailed) {
 				event.setCancelled(true);
 				Billboards.instance.getServer().getScheduler().runTaskLater(Billboards.instance, new Runnable() {
-					
+
 					@Override
 					public void run() {
 						// refresh sign to display text:
@@ -62,25 +62,25 @@ public class EventListener implements Listener {
 			}
 		}
 	}
-	
+
 	@SuppressWarnings("deprecation")
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
 	public void onInteract(PlayerInteractEvent event) {
 		Player player = event.getPlayer();
 		String playerName = player.getName();
 		Block clickedBlock = event.getClickedBlock();
-		
+
 		if (clickedBlock != null && event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-			
+
 			BillboardSign billboardC = Billboards.instance.customers.remove(playerName);
-			
+
 			if (clickedBlock.getType() == Material.SIGN_POST || clickedBlock.getType() == Material.WALL_SIGN) {
 				BillboardSign billboard = Billboards.instance.getBillboard(clickedBlock.getLocation());
 				if (billboard != null && Billboards.instance.refreshSign(billboard)) {
-					
+
 					// cancle all block-placing against a billboard sign already here:
 					event.setCancelled(true);
-					
+
 					// can rent?
 					if (!player.hasPermission(Billboards.RENT_PERMISSION)) {
 						player.sendMessage(Messages.getMessage(Message.NO_PERMISSION));
@@ -91,7 +91,7 @@ public class EventListener implements Listener {
 						player.sendMessage(Messages.getMessage(Message.CANT_RENT_OWN_SIGN));
 						return;
 					}
-					
+
 					if (billboardC != null && billboardC == billboard) {
 						// check if it's still available:
 						if (!billboard.hasOwner()) {
@@ -106,15 +106,15 @@ public class EventListener implements Listener {
 									player.sendMessage(Messages.getMessage(Message.TRANSACTION_FAILURE, withdraw.errorMessage));
 									return;
 								}
-								
+
 								if (billboard.hasCreator()) {
 									// give money to the creator:
 									EconomyResponse deposit = Billboards.economy.depositPlayer(billboard.getCreator(), billboard.getPrice());
 									// transaction successful ?
 									if (!deposit.transactionSuccess()) {
-										// something went wrong  :(
+										// something went wrong :(
 										player.sendMessage(Messages.getMessage(Message.TRANSACTION_FAILURE, deposit.errorMessage));
-										
+
 										// try to refund the withdraw
 										EconomyResponse withdrawUndo = Billboards.economy.depositPlayer(playerName, withdraw.amount);
 										if (!withdrawUndo.transactionSuccess()) {
@@ -143,8 +143,9 @@ public class EventListener implements Listener {
 								sign.setLine(2, Billboards.trimTo16(Messages.getMessage(Message.RENT_SIGN_LINE_3, args)));
 								sign.setLine(3, Billboards.trimTo16(Messages.getMessage(Message.RENT_SIGN_LINE_4, args)));
 								sign.update();
-									
-								player.sendMessage(Messages.getMessage(Message.YOU_HAVE_RENT_A_SIGN, String.valueOf(billboard.getPrice()), String.valueOf(billboard.getDurationInDays()), billboard.getCreator()));
+
+								player.sendMessage(Messages.getMessage(Message.YOU_HAVE_RENT_A_SIGN, String.valueOf(billboard.getPrice()), String.valueOf(billboard.getDurationInDays()),
+										billboard.getCreator()));
 							} else {
 								// not enough money:
 								player.sendMessage(Messages.getMessage(Message.NOT_ENOUGH_MONEY, String.valueOf(billboard.getPrice()), String.valueOf(Billboards.economy.getBalance(playerName))));
@@ -159,7 +160,8 @@ public class EventListener implements Listener {
 							// check if player has enough money:
 							if (Billboards.economy.has(playerName, billboard.getPrice())) {
 								// click again to rent:
-								player.sendMessage(Messages.getMessage(Message.CLICK_TO_RENT, String.valueOf(billboard.getPrice()), String.valueOf(billboard.getDurationInDays()), billboard.getCreator()));
+								player.sendMessage(Messages.getMessage(Message.CLICK_TO_RENT, String.valueOf(billboard.getPrice()), String.valueOf(billboard.getDurationInDays()),
+										billboard.getCreator()));
 								Billboards.instance.customers.put(playerName, billboard);
 							} else {
 								// no enough money:
@@ -167,7 +169,8 @@ public class EventListener implements Listener {
 							}
 						} else {
 							// is owner -> edit
-							if (player.getItemInHand().getType() == Material.SIGN && billboard.hasOwner() && (billboard.getOwner().equals(playerName) || player.hasPermission(Billboards.ADMIN_PERMISSION))) {
+							if (player.getItemInHand().getType() == Material.SIGN && billboard.hasOwner() && (billboard.getOwner().equals(playerName) || player
+									.hasPermission(Billboards.ADMIN_PERMISSION))) {
 								// do not cancel, so that the place event is called:
 								event.setCancelled(false);
 							} else {
@@ -178,16 +181,16 @@ public class EventListener implements Listener {
 								player.sendMessage(Messages.getMessage(Message.INFO_PRICE, String.valueOf(billboard.getPrice())));
 								player.sendMessage(Messages.getMessage(Message.INFO_DURATION, String.valueOf(billboard.getDurationInDays())));
 								player.sendMessage(Messages.getMessage(Message.INFO_RENT_SINCE, dateFormat.format(new Date(billboard.getStartTime()))));
-								
+
 								long endTime = billboard.getEndTime();
 								player.sendMessage(Messages.getMessage(Message.INFO_RENT_UNTIL, dateFormat.format(new Date(endTime))));
-								
+
 								long left = endTime - System.currentTimeMillis();
 								long days = TimeUnit.MILLISECONDS.toDays(left);
 								long hours = TimeUnit.MILLISECONDS.toHours(left) - TimeUnit.DAYS.toHours(days);
 								long minutes = TimeUnit.MILLISECONDS.toMinutes(left) - TimeUnit.DAYS.toMinutes(days) - TimeUnit.HOURS.toMinutes(hours);
 								String timeLeft = String.format(Messages.getMessage(Message.TIME_REMAINING_FORMAT), days, hours, minutes);
-								
+
 								player.sendMessage(Messages.getMessage(Message.INFO_TIME_LEFT, timeLeft));
 							}
 						}
@@ -196,63 +199,66 @@ public class EventListener implements Listener {
 			}
 		}
 	}
-	
-	@EventHandler(priority=EventPriority.LOWEST, ignoreCancelled = false)
+
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
 	public void onBlockPlaceEarly(BlockPlaceEvent event) {
 		Block placed = event.getBlockPlaced();
 		Material typePlaced = placed.getType();
-		
+
 		if (!(typePlaced == Material.WALL_SIGN || typePlaced == Material.SIGN_POST)) return;
-		
+
 		Block against = event.getBlockAgainst();
 		Material typeAgainst = against.getType();
-		
+
 		if (!(typeAgainst == Material.WALL_SIGN || typeAgainst == Material.SIGN_POST)) return;
-		
+
 		BillboardSign billboard = Billboards.instance.getBillboard(against.getLocation());
-		
+
 		if (billboard != null) {
 			Player player = event.getPlayer();
 			String playerName = player.getName();
-			
+
 			// cancle event, so other plugins ignore it and don't print messages for cancelling it:
 			event.setCancelled(true);
-			
+
 			if (billboard.hasOwner() && (billboard.getOwner().equals(playerName) || player.hasPermission(Billboards.ADMIN_PERMISSION))) {
 				edit.put(playerName, new SignEdit(placed.getLocation(), billboard));
 			}
 		}
 	}
-	
-	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled = false)
+
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
 	public void onBlockPlaceLate(BlockPlaceEvent event) {
 		Player player = event.getPlayer();
 		String playerName = player.getName();
-		
+
 		if (edit.containsKey(playerName)) {
 			// make sure the sign can be placed, so that the sign edit window opens for the player
 			event.setCancelled(false);
-			
-			/*Sign update = (Sign) block.getState();
-			Sign editing = (Sign) event.getBlockAgainst().getState();
-			int i = 0;
-			for (String line : editing.getLines())
-				update.setLine(i++, line.replace("&", "&&").replace('§', '&'));
-			update.update();*/
+
+			/*
+			 * Sign update = (Sign) block.getState();
+			 * Sign editing = (Sign) event.getBlockAgainst().getState();
+			 * int i = 0;
+			 * for (String line : editing.getLines())
+			 * update.setLine(i++, line.replace("&", "&&").replace('§', '&'));
+			 * update.update();
+			 */
 		}
 	}
-	
+
 	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void onSignEdit(SignChangeEvent event) {
 		Player player = event.getPlayer();
 		String playerName = player.getName();
-		
+
 		SignEdit signEdit = edit.remove(playerName);
 		if (signEdit != null) {
 			if (Billboards.instance.refreshSign(signEdit.billboard)) {
 				// still owner and has still the permission?
-				if (signEdit.billboard.hasOwner() && (signEdit.billboard.getOwner().equals(playerName) || player.hasPermission(Billboards.ADMIN_PERMISSION)) && player.hasPermission(Billboards.RENT_PERMISSION)) {
+				if (signEdit.billboard.hasOwner() && (signEdit.billboard.getOwner().equals(playerName) || player.hasPermission(Billboards.ADMIN_PERMISSION)) && player
+						.hasPermission(Billboards.RENT_PERMISSION)) {
 					Sign target = (Sign) signEdit.billboard.getLocation().getBukkitLocation(Billboards.instance).getBlock().getState();
 					for (int i = 0; i < 4; i++) {
 						target.setLine(i, event.getLine(i));
@@ -274,10 +280,10 @@ public class EventListener implements Listener {
 			}
 		}
 	}
-	
+
 	@EventHandler
 	public void onQuit(PlayerQuitEvent event) {
 		Billboards.instance.customers.remove(event.getPlayer().getName());
 	}
-	
+
 }

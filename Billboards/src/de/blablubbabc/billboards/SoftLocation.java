@@ -12,7 +12,7 @@ public class SoftLocation {
 	private int x;
 	private int y;
 	private int z;
-	
+
 	public SoftLocation(String worldName, int x, int y, int z) {
 		this.worldName = worldName;
 		this.x = x;
@@ -51,24 +51,24 @@ public class SoftLocation {
 	public void setZ(int z) {
 		this.z = z;
 	}
-	
+
 	public Location getBukkitLocation(Plugin plugin) {
 		World world = plugin.getServer().getWorld(worldName);
 		if (world == null) return null;
 		return new Location(world, x, y, z);
 	}
-	
+
 	public boolean isSameLocation(Location location) {
 		if (location == null) return false;
 		return location.getWorld().getName().equals(worldName) && location.getBlockX() == x && location.getBlockY() == y && location.getBlockZ() == z;
 	}
-	
+
 	public String toString() {
 		return worldName + ";" + x + ";" + y + ";" + z;
 	}
-	
+
 	// statics
-	
+
 	public static List<SoftLocation> getFromStringList(List<String> strings) {
 		List<SoftLocation> softLocs = new ArrayList<SoftLocation>();
 		for (String s : strings) {
@@ -77,7 +77,7 @@ public class SoftLocation {
 		}
 		return softLocs;
 	}
-	
+
 	public static List<String> toStringList(List<SoftLocation> softLocs) {
 		List<String> strings = new ArrayList<String>();
 		for (SoftLocation soft : softLocs) {
@@ -85,7 +85,7 @@ public class SoftLocation {
 		}
 		return strings;
 	}
-	
+
 	public static SoftLocation getFromString(String string) {
 		if (string == null) return null;
 		String[] split = string.split(";");
@@ -100,7 +100,7 @@ public class SoftLocation {
 		if (z == null) return null;
 		return new SoftLocation(worldName, x, y, z);
 	}
-	
+
 	private static Integer parseInteger(String s) {
 		try {
 			return Integer.parseInt(s);
@@ -108,5 +108,5 @@ public class SoftLocation {
 			return null;
 		}
 	}
-	
+
 }

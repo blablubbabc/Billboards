@@ -17,7 +17,7 @@ class Messages {
 		messages = new String[Message.values().length];
 
 		HashMap<String, CustomizableMessage> defaults = new HashMap<String, CustomizableMessage>();
-		
+
 		// initialize default messages
 		addDefault(defaults, Message.YOU_HAVE_TO_SNEAK, "&7You have to sneak to remove this.", null);
 		addDefault(defaults, Message.SIGN_REMOVED, "&aBillboard sign was removed.", null);
@@ -51,7 +51,7 @@ class Messages {
 		addDefault(defaults, Message.RENT_SIGN_LINE_2, "&f{0}", "0: price  1: duration  2: creator 3: new owner");
 		addDefault(defaults, Message.RENT_SIGN_LINE_3, "&cRight-click", "0: price  1: duration  2: creator 3: new owner");
 		addDefault(defaults, Message.RENT_SIGN_LINE_4, "&cwith a sign!", "0: price  1: duration  2: creator 3: new owner");
-		
+
 		// load the message file
 		FileConfiguration config = YamlConfiguration.loadConfiguration(new File(messagesFilePath));
 
@@ -65,8 +65,7 @@ class Messages {
 			// now so that the plugin can run
 			if (messageData == null) {
 				Billboards.logger.severe("Missing message for " + messageID.name() + ".  Please contact the developer.");
-				messageData = new CustomizableMessage(messageID, "Missing message!  ID: " + messageID.name() + ".  Please contact a server admin.",
-						null);
+				messageData = new CustomizableMessage(messageID, "Missing message!  ID: " + messageID.name() + ".  Please contact a server admin.", null);
 			}
 
 			// read the message from the file, use default if necessary

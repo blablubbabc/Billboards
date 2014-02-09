@@ -7,7 +7,7 @@ public class BillboardSign {
 	private int durationInDays;
 	private int price;
 	private long startTime;
-	
+
 	public BillboardSign(SoftLocation location, String creator, String owner, int durationInDays, int price, long startTime) {
 		this.location = location;
 		this.creator = (creator == null || creator.isEmpty()) ? "SERVER" : creator;
@@ -28,15 +28,15 @@ public class BillboardSign {
 	public String getCreator() {
 		return creator;
 	}
-	
+
 	public boolean hasCreator() {
 		return !this.creator.equals("SERVER");
 	}
-	
+
 	public String getOwner() {
 		return owner;
 	}
-	
+
 	public boolean hasOwner() {
 		return !this.owner.equals("SERVER");
 	}
@@ -44,7 +44,7 @@ public class BillboardSign {
 	public void setOwner(String owner) {
 		this.owner = owner == null ? "SERVER" : owner;
 	}
-	
+
 	public void resetOwner() {
 		setOwner(null);
 		startTime = 0;
@@ -73,15 +73,15 @@ public class BillboardSign {
 	public void setStartTime(long startTime) {
 		this.startTime = startTime;
 	}
-	
+
 	public long getEndTime() {
 		return startTime + (durationInDays * 24 * 3600 * 1000);
 	}
-	
+
 	public long getTimeLeft() {
 		return getEndTime() - System.currentTimeMillis();
 	}
-	
+
 	public boolean isRentOver() {
 		return !hasOwner() || getTimeLeft() <= 0;
 	}
