@@ -34,8 +34,9 @@ public class Billboards extends JavaPlugin {
 		return input.length() > 16 ? input.substring(0, 16) : input;
 	}
 
-	private int defaultPrice = 10;
-	private int defaultDurationDays = 7;
+	public int defaultPrice = 10;
+	public int defaultDurationDays = 7;
+	public int maxRent = -1; // no limit by default
 
 	public Map<String, BillboardSign> customers = new HashMap<String, BillboardSign>();
 
@@ -170,6 +171,16 @@ public class Billboards extends JavaPlugin {
 		}
 		return null;
 	}
+	
+	public List<BillboardSign> getRentBillboards(String playerName) {
+		List<BillboardSign> playerSigns = new ArrayList<BillboardSign>();
+		for (BillboardSign sign : signs) {
+			if (sign.getOwner().equals(playerName)) {
+				playerSigns.add(sign);
+			}
+		}
+		return playerSigns;
+	}
 
 	// return true if the sign is still valid
 	public boolean refreshSign(BillboardSign billboard) {
@@ -260,6 +271,7 @@ public class Billboards extends JavaPlugin {
 		if (settingsSection != null) {
 			defaultPrice = settingsSection.getInt("DefaultPrice", 10);
 			defaultDurationDays = settingsSection.getInt("DefaultDurationInDays", 7);
+			maxRent = settingsSection.getInt("MaxRentPerPlayer", -1);
 		}
 
 		// load signs:
@@ -300,6 +312,7 @@ public class Billboards extends JavaPlugin {
 		// write settings to config:
 		config.set("Settings.DefaultPrice", defaultPrice);
 		config.set("Settings.DefaultDurationInDays", defaultDurationDays);
+		config.set("Settings.MaxRentPerPlayer", maxRent);
 
 		// write signs to config:
 		// first clear signs section:

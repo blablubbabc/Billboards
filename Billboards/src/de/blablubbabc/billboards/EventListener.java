@@ -144,8 +144,7 @@ public class EventListener implements Listener {
 								sign.setLine(3, Billboards.trimTo16(Messages.getMessage(Message.RENT_SIGN_LINE_4, args)));
 								sign.update();
 
-								player.sendMessage(Messages.getMessage(Message.YOU_HAVE_RENT_A_SIGN, String.valueOf(billboard.getPrice()), String.valueOf(billboard.getDurationInDays()),
-										billboard.getCreator()));
+								player.sendMessage(Messages.getMessage(Message.YOU_HAVE_RENT_A_SIGN, String.valueOf(billboard.getPrice()), String.valueOf(billboard.getDurationInDays()), billboard.getCreator()));
 							} else {
 								// not enough money:
 								player.sendMessage(Messages.getMessage(Message.NOT_ENOUGH_MONEY, String.valueOf(billboard.getPrice()), String.valueOf(Billboards.economy.getBalance(playerName))));
@@ -157,11 +156,13 @@ public class EventListener implements Listener {
 					} else {
 						// check if available:
 						if (!billboard.hasOwner()) {
-							// check if player has enough money:
-							if (Billboards.economy.has(playerName, billboard.getPrice())) {
+							// check if the player already owns to many billboards:
+							if (Billboards.instance.getRentBillboards(playerName).size() >= Billboards.instance.maxRent) {
+								player.sendMessage(Messages.getMessage(Message.MAX_RENT_LIMIT_REACHED, String.valueOf(Billboards.instance.maxRent)));
+							} else if (Billboards.economy.has(playerName, billboard.getPrice())) {
+								// check if player has enough money:
 								// click again to rent:
-								player.sendMessage(Messages.getMessage(Message.CLICK_TO_RENT, String.valueOf(billboard.getPrice()), String.valueOf(billboard.getDurationInDays()),
-										billboard.getCreator()));
+								player.sendMessage(Messages.getMessage(Message.CLICK_TO_RENT, String.valueOf(billboard.getPrice()), String.valueOf(billboard.getDurationInDays()), billboard.getCreator()));
 								Billboards.instance.customers.put(playerName, billboard);
 							} else {
 								// no enough money:
@@ -169,8 +170,7 @@ public class EventListener implements Listener {
 							}
 						} else {
 							// is owner -> edit
-							if (player.getItemInHand().getType() == Material.SIGN && billboard.hasOwner() && (billboard.getOwner().equals(playerName) || player
-									.hasPermission(Billboards.ADMIN_PERMISSION))) {
+							if (player.getItemInHand().getType() == Material.SIGN && billboard.hasOwner() && (billboard.getOwner().equals(playerName) || player.hasPermission(Billboards.ADMIN_PERMISSION))) {
 								// do not cancel, so that the place event is called:
 								event.setCancelled(false);
 							} else {
@@ -257,8 +257,7 @@ public class EventListener implements Listener {
 		if (signEdit != null) {
 			if (Billboards.instance.refreshSign(signEdit.billboard)) {
 				// still owner and has still the permission?
-				if (signEdit.billboard.hasOwner() && (signEdit.billboard.getOwner().equals(playerName) || player.hasPermission(Billboards.ADMIN_PERMISSION)) && player
-						.hasPermission(Billboards.RENT_PERMISSION)) {
+				if (signEdit.billboard.hasOwner() && (signEdit.billboard.getOwner().equals(playerName) || player.hasPermission(Billboards.ADMIN_PERMISSION)) && player.hasPermission(Billboards.RENT_PERMISSION)) {
 					Sign target = (Sign) signEdit.billboard.getLocation().getBukkitLocation(Billboards.instance).getBlock().getState();
 					for (int i = 0; i < 4; i++) {
 						target.setLine(i, event.getLine(i));

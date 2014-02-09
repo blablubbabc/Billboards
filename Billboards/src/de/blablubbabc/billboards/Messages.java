@@ -38,6 +38,7 @@ class Messages {
 		addDefault(defaults, Message.TRANSACTION_FAILURE, "&cSomething went wrong: {0}", "0: errorMessage");
 		addDefault(defaults, Message.NO_LONGER_AVAILABLE, "&cThis sign is no longer available!", null);
 		addDefault(defaults, Message.NOT_ENOUGH_MONEY, "&cYou have not enough money! \nYou need &8{0} $&c, but you only have &8{1} $&c!", "0: price  1: balance");
+		addDefault(defaults, Message.MAX_RENT_LIMIT_REACHED, "&cYou already own too many billboard signs &7(limit: &e{0}&7)&c!", "0: limit");
 		addDefault(defaults, Message.CANT_RENT_OWN_SIGN, "&cYou can't rent your own sign.", null);
 		addDefault(defaults, Message.NO_PERMISSION, "&cYou have no permission for that.", null);
 		addDefault(defaults, Message.SIGN_LINE_1, "&bRENT ME", "0: price  1: duration  2: creator");
