@@ -171,7 +171,7 @@ public class Billboards extends JavaPlugin {
 		}
 		return null;
 	}
-	
+
 	public List<BillboardSign> getRentBillboards(String playerName) {
 		List<BillboardSign> playerSigns = new ArrayList<BillboardSign>();
 		for (BillboardSign sign : signs) {

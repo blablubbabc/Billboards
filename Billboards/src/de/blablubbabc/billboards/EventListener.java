@@ -157,7 +157,7 @@ public class EventListener implements Listener {
 						// check if available:
 						if (!billboard.hasOwner()) {
 							// check if the player already owns to many billboards:
-							if (Billboards.instance.getRentBillboards(playerName).size() >= Billboards.instance.maxRent) {
+							if (Billboards.instance.maxRent >= 0 && Billboards.instance.getRentBillboards(playerName).size() >= Billboards.instance.maxRent) {
 								player.sendMessage(Messages.getMessage(Message.MAX_RENT_LIMIT_REACHED, String.valueOf(Billboards.instance.maxRent)));
 							} else if (Billboards.economy.has(playerName, billboard.getPrice())) {
 								// check if player has enough money:
@@ -241,7 +241,7 @@ public class EventListener implements Listener {
 			 * Sign editing = (Sign) event.getBlockAgainst().getState();
 			 * int i = 0;
 			 * for (String line : editing.getLines())
-			 * update.setLine(i++, line.replace("&", "&&").replace('§', '&'));
+			 * update.setLine(i++, line.replace("&", "&&").replace('ï¿½', '&'));
 			 * update.update();
 			 */
 		}
