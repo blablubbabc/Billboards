@@ -3,12 +3,14 @@ package de.blablubbabc.billboards;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 class Messages {
+
 	private static String[] messages;
 
 	// loads messages from the messages.yml configuration file into memory
@@ -16,7 +18,7 @@ class Messages {
 		Message[] messageIDs = Message.values();
 		messages = new String[Message.values().length];
 
-		HashMap<String, CustomizableMessage> defaults = new HashMap<String, CustomizableMessage>();
+		Map<String, CustomizableMessage> defaults = new HashMap<String, CustomizableMessage>();
 
 		// initialize default messages
 		addDefault(defaults, Message.YOU_HAVE_TO_SNEAK, "&7You have to sneak to remove this.", null);
@@ -93,7 +95,7 @@ class Messages {
 	}
 
 	// helper for above, adds a default message and notes to go with a message
-	private static void addDefault(HashMap<String, CustomizableMessage> defaults, Message id, String text, String notes) {
+	private static void addDefault(Map<String, CustomizableMessage> defaults, Message id, String text, String notes) {
 		CustomizableMessage message = new CustomizableMessage(id, text, notes);
 		defaults.put(id.name(), message);
 	}
@@ -101,13 +103,10 @@ class Messages {
 	// gets a message from memory
 	static String getMessage(Message messageID, String... args) {
 		String message = messages[messageID.ordinal()];
-
 		for (int i = 0; i < args.length; i++) {
 			String param = args[i];
 			message = message.replace("{" + i + "}", param);
 		}
-
 		return message;
-
 	}
 }

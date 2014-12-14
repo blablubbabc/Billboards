@@ -1,6 +1,7 @@
 package de.blablubbabc.billboards;
 
 public class BillboardSign {
+
 	private SoftLocation location;
 	private String creator;
 	private String owner;

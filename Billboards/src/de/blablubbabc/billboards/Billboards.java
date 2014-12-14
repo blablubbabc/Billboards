@@ -307,7 +307,7 @@ public class Billboards extends JavaPlugin {
 	}
 
 	public void saveCurrentConfig() {
-		FileConfiguration config = getConfig();
+		FileConfiguration config = this.getConfig();
 
 		// write settings to config:
 		config.set("Settings.DefaultPrice", defaultPrice);
@@ -327,6 +327,6 @@ public class Billboards extends JavaPlugin {
 			config.set(node + ".StartTime", billboard.getStartTime());
 		}
 
-		saveConfig();
+		this.saveConfig();
 	}
 }

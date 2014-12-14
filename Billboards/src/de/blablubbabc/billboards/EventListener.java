@@ -284,5 +284,4 @@ public class EventListener implements Listener {
 	public void onQuit(PlayerQuitEvent event) {
 		Billboards.instance.customers.remove(event.getPlayer().getName());
 	}
-
 }

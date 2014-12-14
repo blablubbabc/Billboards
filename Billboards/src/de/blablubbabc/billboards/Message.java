@@ -1,6 +1,7 @@
 package de.blablubbabc.billboards;
 
 enum Message {
+
 	YOU_HAVE_TO_SNEAK,
 	SIGN_REMOVED,
 	ADDED_SIGN,

@@ -8,6 +8,7 @@ import org.bukkit.World;
 import org.bukkit.plugin.Plugin;
 
 public class SoftLocation {
+
 	private String worldName;
 	private int x;
 	private int y;
@@ -108,5 +109,4 @@ public class SoftLocation {
 			return null;
 		}
 	}
-
 }
