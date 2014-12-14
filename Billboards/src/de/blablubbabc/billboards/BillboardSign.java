@@ -3,16 +3,16 @@ package de.blablubbabc.billboards;
 public class BillboardSign {
 
 	private SoftLocation location;
-	private String creator;
-	private String owner;
+	private String creatorName;
+	private String ownerName;
 	private int durationInDays;
 	private int price;
 	private long startTime;
 
-	public BillboardSign(SoftLocation location, String creator, String owner, int durationInDays, int price, long startTime) {
+	public BillboardSign(SoftLocation location, String creatorName, String ownerName, int durationInDays, int price, long startTime) {
 		this.location = location;
-		this.creator = (creator == null || creator.isEmpty()) ? "SERVER" : creator;
-		this.owner = (owner == null || owner.isEmpty()) ? "SERVER" : owner;
+		this.creatorName = (creatorName == null || creatorName.isEmpty()) ? "SERVER" : creatorName;
+		this.ownerName = (ownerName == null || ownerName.isEmpty()) ? "SERVER" : ownerName;
 		this.durationInDays = durationInDays;
 		this.price = price;
 		this.startTime = startTime;
@@ -25,29 +25,29 @@ public class BillboardSign {
 	public void setLocation(SoftLocation location) {
 		this.location = location;
 	}
-
-	public String getCreator() {
-		return creator;
+	
+	public String getCreatorName() {
+		return creatorName;
 	}
 
 	public boolean hasCreator() {
-		return !this.creator.equals("SERVER");
+		return !creatorName.equals("SERVER");
 	}
-
-	public String getOwner() {
-		return owner;
+	
+	public String getOwnerName() {
+		return ownerName;
 	}
 
 	public boolean hasOwner() {
-		return !this.owner.equals("SERVER");
+		return !ownerName.equals("SERVER");
 	}
 
 	public void setOwner(String owner) {
-		this.owner = owner == null ? "SERVER" : owner;
+		this.ownerName = owner == null ? "SERVER" : owner;
 	}
 
 	public void resetOwner() {
-		setOwner(null);
+		this.setOwner(null);
 		startTime = 0;
 	}
 
@@ -80,10 +80,10 @@ public class BillboardSign {
 	}
 
 	public long getTimeLeft() {
-		return getEndTime() - System.currentTimeMillis();
+		return this.getEndTime() - System.currentTimeMillis();
 	}
 
 	public boolean isRentOver() {
-		return !hasOwner() || getTimeLeft() <= 0;
+		return !hasOwner() || this.getTimeLeft() <= 0;
 	}
 }

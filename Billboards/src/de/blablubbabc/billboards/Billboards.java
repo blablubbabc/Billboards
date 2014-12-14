@@ -26,9 +26,9 @@ public class Billboards extends JavaPlugin {
 	public static Billboards instance;
 	public static Logger logger;
 	public static Economy economy = null;
-	public static String ADMIN_PERMISSION = "billboards.admin";
-	public static String RENT_PERMISSION = "billboards.rent";
-	public static String CREATE_PERMISSION = "billboards.create";
+	public static final String ADMIN_PERMISSION = "billboards.admin";
+	public static final String RENT_PERMISSION = "billboards.rent";
+	public static final String CREATE_PERMISSION = "billboards.create";
 
 	public static String trimTo16(String input) {
 		return input.length() > 16 ? input.substring(0, 16) : input;
@@ -38,7 +38,7 @@ public class Billboards extends JavaPlugin {
 	public int defaultDurationDays = 7;
 	public int maxRent = -1; // no limit by default
 
-	public Map<String, BillboardSign> customers = new HashMap<String, BillboardSign>();
+	public final Map<String, BillboardSign> customers = new HashMap<String, BillboardSign>();
 
 	private List<BillboardSign> signs = new ArrayList<BillboardSign>();
 
@@ -133,7 +133,7 @@ public class Billboards extends JavaPlugin {
 					refreshSign(billboard);
 					saveCurrentConfig();
 
-					player.sendMessage(Messages.getMessage(Message.ADDED_SIGN, String.valueOf(price), String.valueOf(duration), billboard.getCreator()));
+					player.sendMessage(Messages.getMessage(Message.ADDED_SIGN, String.valueOf(price), String.valueOf(duration), billboard.getCreatorName()));
 				}
 			}
 		} else {
@@ -175,7 +175,7 @@ public class Billboards extends JavaPlugin {
 	public List<BillboardSign> getRentBillboards(String playerName) {
 		List<BillboardSign> playerSigns = new ArrayList<BillboardSign>();
 		for (BillboardSign sign : signs) {
-			if (sign.getOwner().equals(playerName)) {
+			if (sign.getOwnerName().equals(playerName)) {
 				playerSigns.add(sign);
 			}
 		}
@@ -218,7 +218,7 @@ public class Billboards extends JavaPlugin {
 	}
 
 	private void setRentableText(BillboardSign billboard, Sign sign) {
-		String[] args = new String[] { String.valueOf(billboard.getPrice()), String.valueOf(billboard.getDurationInDays()), billboard.getCreator() };
+		String[] args = new String[] { String.valueOf(billboard.getPrice()), String.valueOf(billboard.getDurationInDays()), billboard.getCreatorName() };
 
 		sign.setLine(0, trimTo16(Messages.getMessage(Message.SIGN_LINE_1, args)));
 		sign.setLine(1, trimTo16(Messages.getMessage(Message.SIGN_LINE_2, args)));
@@ -320,8 +320,8 @@ public class Billboards extends JavaPlugin {
 		// then insert current information:
 		for (BillboardSign billboard : signs) {
 			String node = "Signs." + billboard.getLocation().toString();
-			config.set(node + ".Creator", billboard.getCreator());
-			config.set(node + ".Owner", billboard.getOwner());
+			config.set(node + ".Creator", billboard.getCreatorName());
+			config.set(node + ".Owner", billboard.getOwnerName());
 			config.set(node + ".Duration", billboard.getDurationInDays());
 			config.set(node + ".Price", billboard.getPrice());
 			config.set(node + ".StartTime", billboard.getStartTime());
