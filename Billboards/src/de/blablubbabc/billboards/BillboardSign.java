@@ -25,7 +25,7 @@ public class BillboardSign {
 	public void setLocation(SoftLocation location) {
 		this.location = location;
 	}
-	
+
 	public String getCreatorName() {
 		return creatorName;
 	}
@@ -33,7 +33,7 @@ public class BillboardSign {
 	public boolean hasCreator() {
 		return !creatorName.equals("SERVER");
 	}
-	
+
 	public String getOwnerName() {
 		return ownerName;
 	}

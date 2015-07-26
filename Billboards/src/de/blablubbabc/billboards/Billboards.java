@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import net.milkbowl.vault.economy.Economy;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -24,7 +24,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class Billboards extends JavaPlugin {
 
 	public static Billboards instance;
-	public static Logger logger;
 	public static Economy economy = null;
 	public static final String ADMIN_PERMISSION = "billboards.admin";
 	public static final String RENT_PERMISSION = "billboards.rent";
@@ -45,10 +44,9 @@ public class Billboards extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		instance = this;
-		logger = getLogger();
 		if (!setupEconomy()) {
-			logger.severe("No economy plugin was found! Disables now!");
-			getServer().getPluginManager().disablePlugin(this);
+			this.getLogger().severe("No economy plugin was found! Disables now!");
+			Bukkit.getPluginManager().disablePlugin(this);
 			return;
 		}
 
@@ -56,13 +54,13 @@ public class Billboards extends JavaPlugin {
 		Messages.loadMessages("plugins" + File.separator + "Billboards" + File.separator + "messages.yml");
 
 		// load config and signs:
-		loadConfig();
+		this.loadConfig();
 
 		// register listener
-		getServer().getPluginManager().registerEvents(new EventListener(), this);
+		Bukkit.getPluginManager().registerEvents(new EventListener(), this);
 
 		// start refresh timer:
-		getServer().getScheduler().runTaskTimer(this, new Runnable() {
+		Bukkit.getScheduler().runTaskTimer(this, new Runnable() {
 
 			@Override
 			public void run() {
@@ -73,7 +71,7 @@ public class Billboards extends JavaPlugin {
 
 	@Override
 	public void onDisable() {
-		getServer().getScheduler().cancelTasks(this);
+		Bukkit.getScheduler().cancelTasks(this);
 		instance = null;
 	}
 
@@ -152,7 +150,7 @@ public class Billboards extends JavaPlugin {
 	}
 
 	private boolean setupEconomy() {
-		RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
+		RegisteredServiceProvider<Economy> economyProvider = Bukkit.getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
 		if (economyProvider != null) {
 			economy = economyProvider.getProvider();
 		}
@@ -185,13 +183,13 @@ public class Billboards extends JavaPlugin {
 	// return true if the sign is still valid
 	public boolean refreshSign(BillboardSign billboard) {
 		if (!signs.contains(billboard)) {
-			logger.warning("Billboard '" + billboard.getLocation().toString() + "' is no longer an valid billboard sign, but was refreshed.");
+			this.getLogger().warning("Billboard '" + billboard.getLocation().toString() + "' is no longer an valid billboard sign, but was refreshed.");
 			return false;
 		}
 
 		Location location = billboard.getLocation().getBukkitLocation(this);
 		if (location == null) {
-			logger.warning("World '" + billboard.getLocation().getWorldName() + "' not found. Removing this billboard sign.");
+			this.getLogger().warning("World '" + billboard.getLocation().getWorldName() + "' not found. Removing this billboard sign.");
 			removeBillboard(billboard);
 			return false;
 		}
@@ -199,7 +197,7 @@ public class Billboards extends JavaPlugin {
 		Block block = location.getBlock();
 		Material type = block.getType();
 		if (type != Material.WALL_SIGN && type != Material.SIGN_POST) {
-			logger.warning("Billboard '" + billboard.getLocation().toString() + "' is no longer a sign. Removing this billboard sign.");
+			this.getLogger().warning("Billboard '" + billboard.getLocation().toString() + "' is no longer a sign. Removing this billboard sign.");
 			removeBillboard(billboard);
 			return false;
 		}
@@ -232,13 +230,13 @@ public class Billboards extends JavaPlugin {
 		for (BillboardSign billboard : signs) {
 			Location location = billboard.getLocation().getBukkitLocation(this);
 			if (location == null) {
-				logger.warning("World '" + billboard.getLocation().getWorldName() + "' not found. Removing this billboard sign.");
+				this.getLogger().warning("World '" + billboard.getLocation().getWorldName() + "' not found. Removing this billboard sign.");
 				forRemoval.add(billboard);
 				continue;
 			}
 			Block block = location.getBlock();
 			if (!(block.getState() instanceof Sign)) {
-				logger.warning("Billboard sign '" + billboard.getLocation().toString() + "' is no longer a sign. Removing this billboard sign.");
+				this.getLogger().warning("Billboard sign '" + billboard.getLocation().toString() + "' is no longer a sign. Removing this billboard sign.");
 				forRemoval.add(billboard);
 				continue;
 			}
@@ -281,13 +279,13 @@ public class Billboards extends JavaPlugin {
 
 				ConfigurationSection signSection = signsSection.getConfigurationSection(softString);
 				if (signSection == null) {
-					logger.warning("Couldn't load a sign section: " + softString);
+					this.getLogger().warning("Couldn't load a sign section: " + softString);
 					continue;
 				}
 
 				SoftLocation soft = SoftLocation.getFromString(softString);
 				if (soft == null) {
-					logger.warning("Couldn't load a signs location: " + softString);
+					this.getLogger().warning("Couldn't load a signs location: " + softString);
 					continue;
 				}
 
