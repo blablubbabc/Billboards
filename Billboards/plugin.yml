@@ -1,6 +1,6 @@
 name: Billboards
 main: de.blablubbabc.billboards.Billboards
-version: 1.7
+version: 1.6
 author: blablubbabc
 description: Rent-able signs.
 depend: [Vault]
