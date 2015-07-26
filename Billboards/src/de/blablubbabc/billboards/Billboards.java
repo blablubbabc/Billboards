@@ -36,6 +36,7 @@ public class Billboards extends JavaPlugin {
 	public int defaultPrice = 10;
 	public int defaultDurationDays = 7;
 	public int maxRent = -1; // no limit by default
+	public boolean bypassSignUpdateBlocking = false;
 
 	public final Map<String, BillboardSign> customers = new HashMap<String, BillboardSign>();
 
@@ -262,7 +263,7 @@ public class Billboards extends JavaPlugin {
 	}
 
 	public void loadConfig() {
-		FileConfiguration config = getConfig();
+		FileConfiguration config = this.getConfig();
 
 		// load settings:
 		ConfigurationSection settingsSection = config.getConfigurationSection("Settings");
@@ -270,6 +271,7 @@ public class Billboards extends JavaPlugin {
 			defaultPrice = settingsSection.getInt("DefaultPrice", 10);
 			defaultDurationDays = settingsSection.getInt("DefaultDurationInDays", 7);
 			maxRent = settingsSection.getInt("MaxRentPerPlayer", -1);
+			bypassSignUpdateBlocking = settingsSection.getBoolean("BypassSignUpdateBlocking", false);
 		}
 
 		// load signs:
@@ -300,8 +302,7 @@ public class Billboards extends JavaPlugin {
 		}
 
 		// write changes back to config:
-		saveCurrentConfig();
-
+		this.saveCurrentConfig();
 	}
 
 	public void saveCurrentConfig() {
@@ -311,6 +312,7 @@ public class Billboards extends JavaPlugin {
 		config.set("Settings.DefaultPrice", defaultPrice);
 		config.set("Settings.DefaultDurationInDays", defaultDurationDays);
 		config.set("Settings.MaxRentPerPlayer", maxRent);
+		config.set("Settings.BypassSignUpdateBlocking", bypassSignUpdateBlocking);
 
 		// write signs to config:
 		// first clear signs section:

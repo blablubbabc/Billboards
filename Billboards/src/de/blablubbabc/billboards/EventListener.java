@@ -249,13 +249,19 @@ public class EventListener implements Listener {
 			if (Billboards.instance.refreshSign(signEdit.billboard)) {
 				// still owner and has still the permission?
 				if (signEdit.billboard.hasOwner() && (signEdit.billboard.getOwnerName().equals(playerName) || player.hasPermission(Billboards.ADMIN_PERMISSION)) && player.hasPermission(Billboards.RENT_PERMISSION)) {
-					Sign target = (Sign) signEdit.billboard.getLocation().getBukkitLocation(Billboards.instance).getBlock().getState();
-					for (int i = 0; i < 4; i++) {
-						target.setLine(i, event.getLine(i));
+					if (!event.isCancelled() || Billboards.instance.bypassSignUpdateBlocking) {
+						// update billboard sign content:
+						Sign target = (Sign) signEdit.billboard.getLocation().getBukkitLocation(Billboards.instance).getBlock().getState();
+						for (int i = 0; i < 4; i++) {
+							target.setLine(i, event.getLine(i));
+						}
+						target.update();
+					} else {
+						// some other plugin cancelled sign updating (ex. anti-swearing plugins):
 					}
-					target.update();
 				}
 			}
+
 			// cancel and give sign back:
 			event.setCancelled(true);
 			signEdit.source.getBlock().setType(Material.AIR);
