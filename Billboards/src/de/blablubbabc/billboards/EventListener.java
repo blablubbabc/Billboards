@@ -26,8 +26,8 @@ import org.bukkit.inventory.ItemStack;
 
 public class EventListener implements Listener {
 
-	private Map<String, SignEdit> edit = new HashMap<String, SignEdit>();
-	private SimpleDateFormat dateFormat = new SimpleDateFormat(Messages.getMessage(Message.DATE_FORMAT));
+	private final Map<String, SignEdit> edit = new HashMap<String, SignEdit>();
+	private final SimpleDateFormat dateFormat = new SimpleDateFormat(Messages.getMessage(Message.DATE_FORMAT));
 
 	@EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
 	public void onBlockBreak(BlockBreakEvent event) {
@@ -235,20 +235,11 @@ public class EventListener implements Listener {
 		if (edit.containsKey(playerName)) {
 			// make sure the sign can be placed, so that the sign edit window opens for the player
 			event.setCancelled(false);
-
-			/*
-			 * Sign update = (Sign) block.getState();
-			 * Sign editing = (Sign) event.getBlockAgainst().getState();
-			 * int i = 0;
-			 * for (String line : editing.getLines())
-			 * update.setLine(i++, line.replace("&", "&&").replace('�', '&'));
-			 * update.update();
-			 */
 		}
 	}
 
 	@SuppressWarnings("deprecation")
-	@EventHandler
+	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = false)
 	public void onSignEdit(SignChangeEvent event) {
 		Player player = event.getPlayer();
 		String playerName = player.getName();
@@ -265,7 +256,7 @@ public class EventListener implements Listener {
 					target.update();
 				}
 			}
-			// cancle and give sign back:
+			// cancel and give sign back:
 			event.setCancelled(true);
 			signEdit.source.getBlock().setType(Material.AIR);
 			if (player.getGameMode() != GameMode.CREATIVE) {
