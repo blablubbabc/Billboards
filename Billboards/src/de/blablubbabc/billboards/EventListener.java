@@ -249,7 +249,7 @@ public class EventListener implements Listener {
 			if (Billboards.instance.refreshSign(signEdit.billboard)) {
 				// still owner and has still the permission?
 				if (signEdit.billboard.hasOwner() && (signEdit.billboard.getOwnerName().equals(playerName) || player.hasPermission(Billboards.ADMIN_PERMISSION)) && player.hasPermission(Billboards.RENT_PERMISSION)) {
-					if (!event.isCancelled() || Billboards.instance.bypassSignUpdateBlocking) {
+					if (!event.isCancelled() || Billboards.instance.bypassSignChangeBlocking) {
 						// update billboard sign content:
 						Sign target = (Sign) signEdit.billboard.getLocation().getBukkitLocation(Billboards.instance).getBlock().getState();
 						for (int i = 0; i < 4; i++) {
