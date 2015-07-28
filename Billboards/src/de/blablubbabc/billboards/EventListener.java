@@ -218,7 +218,7 @@ public class EventListener implements Listener {
 			Player player = event.getPlayer();
 			String playerName = player.getName();
 
-			// cancle event, so other plugins ignore it and don't print messages for cancelling it:
+			// cancel event, so other plugins ignore it and don't print messages for cancelling it:
 			event.setCancelled(true);
 
 			if (billboard.hasOwner() && (billboard.getOwnerName().equals(playerName) || player.hasPermission(Billboards.ADMIN_PERMISSION))) {
