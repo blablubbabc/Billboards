@@ -1,6 +1,6 @@
 name: Billboards
 main: de.blablubbabc.billboards.Billboards
-version: 1.6
+version: '${project.version}'
 author: blablubbabc
 description: Rent-able signs.
 depend: [Vault]
