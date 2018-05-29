@@ -14,6 +14,7 @@ This update is not backwards compatible. If you have run a previous version of B
 * The config, billboards storage and message format have changed! Please remove any old data before updating!
 * Fixed support for Bukkit 1.12.1 and above.
 * Fix: Players can only break signs they are the creator of if the sign isn't currently owned by some other player.
+* Added 'billboards' command alias.
 * Major internal refactoring and cleanup.
 
 ## v1.6 Release (2015-07-26)
