@@ -90,7 +90,7 @@ public class BillboardCommands implements CommandExecutor {
 		}
 
 		// add and setup billboard sign:
-		BillboardSign billboard = new BillboardSign(blockLocation, creator.getUniqueId(), creator.getName(), null, null, duration, price, 0);
+		BillboardSign billboard = new BillboardSign(blockLocation, creator, duration, price);
 		plugin.addBillboard(billboard);
 		plugin.refreshSign(billboard);
 		plugin.saveBillboards();

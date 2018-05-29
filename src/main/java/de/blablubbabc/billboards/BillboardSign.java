@@ -22,6 +22,12 @@ public class BillboardSign {
 
 	private boolean valid = false;
 
+	// shortcut: used when creating a new billboard, creator is null if owned by the server
+	public BillboardSign(SoftBlockLocation location, Player creator, int durationInDays, int price) {
+		this(location, (creator != null ? creator.getUniqueId() : null), (creator != null ? creator.getName() : null), null, null, durationInDays, price, 0);
+	}
+
+	// full: used when loading billboards
 	public BillboardSign(	SoftBlockLocation location, UUID creatorUUID, String lastKnownCreatorName,
 							UUID ownerUUID, String lastKnownOwnerName, int durationInDays, int price, long startTime) {
 		Validate.notNull(location, "Location is null!");
