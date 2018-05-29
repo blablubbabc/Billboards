@@ -8,7 +8,7 @@ Date format: (YYYY-MM-DD)
 ## v2.0 Release (2018-05-29)
 ### Supported MC versions: 1.12, 1.11, 1.10, 1.9, 1.8
 This update is not backwards compatible. If you have run a previous version of Billboards in the past, please remove the old Billboards plugin folder before running this versions.
-* UUID update: All players are now identifier by uuids instead of names. Make sure that your economy plugin supports Vault's OfflinePlayer (UUID) API.
+* UUID update: All players are now identified by uuids instead of names. Make sure that your economy plugin supports Vault's OfflinePlayer (UUID) API.
 * Some messages have slightly changed and new ones have been added for unknown names, unknown uuid and server owner name. Message parameters for creator and owner uuids have been added.
 * Signs data is now stored in a separate file (billboards.yml). Old data does not get imported!
 * The config, billboards storage and message format have changed! Please remove any old data before updating!
