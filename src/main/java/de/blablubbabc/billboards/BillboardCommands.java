@@ -2,7 +2,7 @@ package de.blablubbabc.billboards;
 
 import java.util.Set;
 
-import org.bukkit.Location;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
@@ -46,7 +46,7 @@ public class BillboardCommands implements CommandExecutor {
 			player.sendMessage(Messages.getMessage(Message.NO_TARGETED_SIGN));
 			return true;
 		}
-		Location blockLocation = targetBlock.getLocation();
+		SoftBlockLocation blockLocation = new SoftBlockLocation(targetBlock);
 
 		// already a billboard sign?
 		if (plugin.getBillboard(blockLocation) != null) {
@@ -74,25 +74,29 @@ public class BillboardCommands implements CommandExecutor {
 			duration = durationArgument.intValue();
 		}
 
-		String creator = hasAdminPermission ? null : player.getName();
-
+		Player creator = hasAdminPermission ? null : player;
 		if (args.length == 1 || args.length == 3) {
 			if (!hasAdminPermission) {
 				player.sendMessage(Messages.getMessage(Message.NO_PERMISSION));
 				return true;
 			}
-			creator = args[args.length == 1 ? 0 : 2];
+			String creatorName = args[args.length == 1 ? 0 : 2];
+			// TODO support offline players
+			creator = Bukkit.getPlayer(creatorName);
+			if (creator == null) {
+				player.sendMessage(Messages.getMessage(Message.PLAYER_NOT_FOUND, creatorName));
+				return true;
+			}
 		}
 
 		// add and setup billboard sign:
-		BillboardSign billboard = new BillboardSign(new SoftBlockLocation(blockLocation), creator, null, duration, price, 0);
+		BillboardSign billboard = new BillboardSign(blockLocation, creator.getUniqueId(), creator.getName(), null, null, duration, price, 0);
 		plugin.addBillboard(billboard);
-		if (plugin.refreshSign(billboard)) {
-			plugin.saveSigns();
-		}
+		plugin.refreshSign(billboard);
+		plugin.saveBillboards();
 
-		player.sendMessage(Messages.getMessage(Message.ADDED_SIGN, String.valueOf(price), String.valueOf(duration), billboard.getCreatorName()));
+		String[] msgArgs = billboard.getMessageArgs();
+		player.sendMessage(Messages.getMessage(Message.ADDED_SIGN, msgArgs));
 		return true;
 	}
-
 }

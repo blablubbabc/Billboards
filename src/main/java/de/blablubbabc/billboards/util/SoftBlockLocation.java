@@ -3,10 +3,10 @@ package de.blablubbabc.billboards.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.plugin.Plugin;
 
 public class SoftBlockLocation {
 
@@ -46,8 +46,8 @@ public class SoftBlockLocation {
 		return z;
 	}
 
-	public Location getBukkitLocation(Plugin plugin) {
-		World world = plugin.getServer().getWorld(worldName);
+	public Location getBukkitLocation() {
+		World world = Bukkit.getWorld(worldName);
 		if (world == null) return null;
 		return new Location(world, x, y, z);
 	}

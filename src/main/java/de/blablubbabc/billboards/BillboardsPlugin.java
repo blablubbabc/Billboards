@@ -7,11 +7,16 @@ import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Level;
 
+import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -41,8 +46,8 @@ public class BillboardsPlugin extends JavaPlugin {
 	public static final String RENT_PERMISSION = "billboards.rent";
 	public static final String CREATE_PERMISSION = "billboards.create";
 
-	private static final String SIGNS_DATA_FILE = "signs.yml";
-	private static final String SIGNS_DATA_FILE_ENCODING = "UTF-8";
+	private static final String BILLBOARDS_DATA_FILE = "billboards.yml";
+	private static final String BILLBOARDS_DATA_FILE_ENCODING = "UTF-8";
 
 	// settings:
 	public int defaultPrice = 10;
@@ -51,7 +56,8 @@ public class BillboardsPlugin extends JavaPlugin {
 	public boolean bypassSignChangeBlocking = false;
 
 	// data:
-	private final Set<BillboardSign> signs = new LinkedHashSet<>();
+	private final Map<SoftBlockLocation, BillboardSign> billboards = new LinkedHashMap<>();
+	private final Collection<BillboardSign> billboardsView = Collections.unmodifiableCollection(billboards.values());
 
 	@Override
 	public void onEnable() {
@@ -69,7 +75,7 @@ public class BillboardsPlugin extends JavaPlugin {
 		this.reloadConfig();
 
 		// loads signs:
-		this.loadSigns();
+		this.loadBillboards();
 
 		// register listener:
 		Bukkit.getPluginManager().registerEvents(new EventListener(this), this);
@@ -94,123 +100,7 @@ public class BillboardsPlugin extends JavaPlugin {
 		instance = null;
 	}
 
-	private boolean setupEconomy() {
-		RegisteredServiceProvider<Economy> economyProvider = Bukkit.getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
-		if (economyProvider != null) {
-			economy = economyProvider.getProvider();
-		}
-		return (economy != null);
-	}
-
-	// BILLBOARDS
-
-	public void addBillboard(BillboardSign billboard) {
-		signs.add(billboard);
-	}
-
-	public void removeBillboard(BillboardSign billboard) {
-		signs.remove(billboard);
-	}
-
-	public BillboardSign getBillboard(Location loc) {
-		for (BillboardSign billboard : signs) {
-			if (billboard.getLocation().isSameLocation(loc)) return billboard;
-		}
-		return null;
-	}
-
-	public List<BillboardSign> getRentBillboards(String playerName) {
-		List<BillboardSign> playerSigns = new ArrayList<BillboardSign>();
-		for (BillboardSign sign : signs) {
-			if (sign.getOwnerName().equals(playerName)) {
-				playerSigns.add(sign);
-			}
-		}
-		return playerSigns;
-	}
-
-	// return true if the sign is still valid
-	public boolean refreshSign(BillboardSign billboard) {
-		if (!signs.contains(billboard)) {
-			this.getLogger().warning("Billboard '" + billboard.getLocation().toString() + "' is no longer an valid billboard sign, but was refreshed.");
-			return false;
-		}
-
-		Location location = billboard.getLocation().getBukkitLocation(this);
-		if (location == null) {
-			this.getLogger().warning("World '" + billboard.getLocation().getWorldName() + "' not found. Removing this billboard sign.");
-			this.removeBillboard(billboard);
-			this.saveSigns();
-			return false;
-		}
-
-		Block block = location.getBlock();
-		Material type = block.getType();
-		if (type != Material.WALL_SIGN && type != Material.SIGN_POST) {
-			this.getLogger().warning("Billboard '" + billboard.getLocation().toString() + "' is no longer a sign. Removing this billboard sign.");
-			this.removeBillboard(billboard);
-			this.saveSigns();
-			return false;
-		}
-
-		// check rent time if it has an owner:
-		if (billboard.hasOwner() && billboard.isRentOver()) {
-			billboard.resetOwner();
-		}
-		// update text if it has no owner:
-		if (!billboard.hasOwner()) {
-			Sign sign = (Sign) block.getState();
-			this.setRentableText(billboard, sign);
-		}
-
-		return true;
-	}
-
-	private void setRentableText(BillboardSign billboard, Sign sign) {
-		String[] args = new String[] { String.valueOf(billboard.getPrice()), String.valueOf(billboard.getDurationInDays()), billboard.getCreatorName() };
-
-		sign.setLine(0, Utils.trimTo16(Messages.getMessage(Message.SIGN_LINE_1, args)));
-		sign.setLine(1, Utils.trimTo16(Messages.getMessage(Message.SIGN_LINE_2, args)));
-		sign.setLine(2, Utils.trimTo16(Messages.getMessage(Message.SIGN_LINE_3, args)));
-		sign.setLine(3, Utils.trimTo16(Messages.getMessage(Message.SIGN_LINE_4, args)));
-		sign.update();
-	}
-
-	public void refreshAllSigns() {
-		List<BillboardSign> forRemoval = new ArrayList<BillboardSign>();
-		for (BillboardSign billboard : signs) {
-			Location location = billboard.getLocation().getBukkitLocation(this);
-			if (location == null) {
-				this.getLogger().warning("World '" + billboard.getLocation().getWorldName() + "' not found. Removing this billboard sign.");
-				forRemoval.add(billboard);
-				continue;
-			}
-			Block block = location.getBlock();
-			if (!(block.getState() instanceof Sign)) {
-				this.getLogger().warning("Billboard sign '" + billboard.getLocation().toString() + "' is no longer a sign. Removing this billboard sign.");
-				forRemoval.add(billboard);
-				continue;
-			}
-
-			// check rent time if has owner:
-			if (billboard.hasOwner() && billboard.isRentOver()) {
-				billboard.resetOwner();
-			}
-			// update text if has no owner:
-			if (!billboard.hasOwner()) {
-				Sign sign = (Sign) block.getState();
-				setRentableText(billboard, sign);
-			}
-
-		}
-		// remove invalid billboards:
-		if (forRemoval.size() > 0) {
-			for (BillboardSign billboard : forRemoval) {
-				this.removeBillboard(billboard);
-			}
-			this.saveSigns();
-		}
-	}
+	// CONFIG
 
 	@Override
 	public void reloadConfig() {
@@ -239,75 +129,250 @@ public class BillboardsPlugin extends JavaPlugin {
 		super.saveConfig();
 	}
 
-	private File getSignsDataFile() {
-		return new File(this.getDataFolder(), SIGNS_DATA_FILE);
+	// SETUP
+
+	private boolean setupEconomy() {
+		RegisteredServiceProvider<Economy> economyProvider = Bukkit.getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
+		if (economyProvider != null) {
+			economy = economyProvider.getProvider();
+		}
+		return (economy != null);
 	}
 
-	private void loadSigns() {
-		// loads signs data from file:
-		File signsDataFile = this.getSignsDataFile();
+	// BILLBOARDS
+
+	public void addBillboard(BillboardSign billboard) {
+		Validate.isTrue(!billboard.isValid(), "Billboard was already added!");
+		billboards.put(billboard.getLocation(), billboard);
+		billboard.setValid(true);
+	}
+
+	public void removeBillboard(BillboardSign billboard) {
+		Validate.isTrue(billboard.isValid(), "Billboard is not valid!");
+		billboards.remove(billboard.getLocation());
+		billboard.setValid(false);
+	}
+
+	public void removeAllBillboards() {
+		Iterator<BillboardSign> iterator = billboards.values().iterator();
+		while (iterator.hasNext()) {
+			BillboardSign billboard = iterator.next();
+			billboard.setValid(false);
+			iterator.remove();
+		}
+	}
+
+	public BillboardSign getBillboard(SoftBlockLocation location) {
+		return billboards.get(location);
+	}
+
+	public List<BillboardSign> getRentBillboards(UUID playerUUID) {
+		List<BillboardSign> playerBillboards = new ArrayList<>();
+		for (BillboardSign billboard : billboardsView) {
+			if (billboard.isOwner(playerUUID)) {
+				playerBillboards.add(billboard);
+			}
+		}
+		return playerBillboards;
+	}
+
+	public void refreshAllSigns() {
+		List<BillboardSign> forRemoval = new ArrayList<BillboardSign>();
+		for (BillboardSign billboard : billboardsView) {
+			Location location = billboard.getLocation().getBukkitLocation();
+			if (location == null) {
+				// TODO really remove? what if the world is only temporarily unloaded?
+				this.getLogger().warning("World '" + billboard.getLocation().getWorldName() + "' not found. Removing this billboard sign.");
+				forRemoval.add(billboard);
+				continue;
+			}
+			// TODO really load chunks here?
+			Block block = location.getBlock();
+			if (!(block.getState() instanceof Sign)) {
+				this.getLogger().warning("Billboard sign '" + billboard.getLocation().toString() + "' is no longer a sign. Removing this billboard sign.");
+				forRemoval.add(billboard);
+				continue;
+			}
+
+			// check rent time if has owner:
+			if (billboard.hasOwner() && billboard.isRentOver()) {
+				billboard.resetOwner();
+			}
+			// update text if has no owner:
+			if (!billboard.hasOwner()) {
+				Sign sign = (Sign) block.getState();
+				setRentableText(billboard, sign);
+			}
+
+		}
+		// remove invalid billboards:
+		if (forRemoval.size() > 0) {
+			for (BillboardSign billboard : forRemoval) {
+				this.removeBillboard(billboard);
+			}
+			this.saveBillboards();
+		}
+	}
+
+	// return true if the sign is still valid
+	public boolean refreshSign(BillboardSign billboard) {
+		if (!billboard.isValid()) {
+			this.getLogger().warning("Cannot refresh sign of an no longer valid billboard at '" + billboard.getLocation().toString() + "'.");
+			return false;
+		}
+
+		Location location = billboard.getLocation().getBukkitLocation();
+		if (location == null) {
+			this.getLogger().warning("World '" + billboard.getLocation().getWorldName() + "' not found. Removing this billboard sign.");
+			this.removeBillboard(billboard);
+			this.saveBillboards();
+			return false;
+		}
+
+		Block block = location.getBlock();
+		Material type = block.getType();
+		if (type != Material.WALL_SIGN && type != Material.SIGN_POST) {
+			this.getLogger().warning("Billboard '" + billboard.getLocation().toString() + "' is no longer a sign. Removing this billboard sign.");
+			this.removeBillboard(billboard);
+			this.saveBillboards();
+			return false;
+		}
+
+		// check rent time if it has an owner:
+		if (billboard.hasOwner() && billboard.isRentOver()) {
+			billboard.resetOwner();
+		}
+		// update text if it has no owner:
+		if (!billboard.hasOwner()) {
+			Sign sign = (Sign) block.getState();
+			this.setRentableText(billboard, sign);
+		}
+
+		return true;
+	}
+
+	private void setRentableText(BillboardSign billboard, Sign sign) {
+		String[] msgArgs = billboard.getMessageArgs();
+
+		sign.setLine(0, Utils.trimTo16(Messages.getMessage(Message.SIGN_LINE_1, msgArgs)));
+		sign.setLine(1, Utils.trimTo16(Messages.getMessage(Message.SIGN_LINE_2, msgArgs)));
+		sign.setLine(2, Utils.trimTo16(Messages.getMessage(Message.SIGN_LINE_3, msgArgs)));
+		sign.setLine(3, Utils.trimTo16(Messages.getMessage(Message.SIGN_LINE_4, msgArgs)));
+		sign.update();
+	}
+
+	// updates last known names for the specified player:
+	void updateLastKnownName(UUID playerUUID, String playerName) {
+		Validate.notNull(playerUUID);
+		Validate.notNull(playerName);
+		boolean dirty = false;
+		for (BillboardSign billboard : billboards.values()) {
+			if (billboard.isCreator(playerUUID)) {
+				if (!playerName.equals(billboard.getLastKnownCreatorName())) {
+					billboard.setLastKnownCreatorName(playerName);
+					dirty = true;
+				}
+			}
+			if (billboard.isOwner(playerUUID)) {
+				if (!playerName.equals(billboard.getLastKnownOwnerName())) {
+					billboard.setLastOwnerCreatorName(playerName);
+					dirty = true;
+				}
+			}
+		}
+		if (dirty) {
+			this.saveBillboards();
+		}
+	}
+
+	// BILLBOARDS DATA
+
+	private File getBillboardsDataFile() {
+		return new File(this.getDataFolder(), BILLBOARDS_DATA_FILE);
+	}
+
+	private void loadBillboards() {
+		// loads billboards data from file:
+		File signsDataFile = this.getBillboardsDataFile();
 		YamlConfiguration signsData = new YamlConfiguration();
 		try (	FileInputStream stream = new FileInputStream(signsDataFile);
-				InputStreamReader reader = new InputStreamReader(stream, SIGNS_DATA_FILE_ENCODING)) {
+				InputStreamReader reader = new InputStreamReader(stream, BILLBOARDS_DATA_FILE_ENCODING)) {
 			signsData.load(reader);
 		} catch (FileNotFoundException ex) {
 			// ignore
 		} catch (Exception e) {
-			this.getLogger().log(Level.SEVERE, "Failed to load signs data file!", e);
+			this.getLogger().log(Level.SEVERE, "Failed to load billboards data file!", e);
 			return;
 		}
 
 		// unload currently loaded signs:
-		signs.clear();
+		this.removeAllBillboards();
 
 		// freshly load signs:
-		for (String signLocationString : signsData.getKeys(false)) {
-			ConfigurationSection signSection = signsData.getConfigurationSection(signLocationString);
+		for (String node : signsData.getKeys(false)) {
+			ConfigurationSection signSection = signsData.getConfigurationSection(node);
 			if (signSection == null) {
-				this.getLogger().warning("Couldn't load sign (invalid config section): " + signLocationString);
+				this.getLogger().warning("Couldn't load sign (invalid config section): " + node);
 				continue;
 			}
 
-			SoftBlockLocation signLocation = SoftBlockLocation.getFromString(signLocationString);
+			SoftBlockLocation signLocation = SoftBlockLocation.getFromString(node);
 			if (signLocation == null) {
-				this.getLogger().warning("Couldn't load sign (invalid location): " + signLocationString);
+				this.getLogger().warning("Couldn't load sign (invalid location): " + node);
 				continue;
 			}
 
-			String creator = signSection.getString("Creator", null);
-			String owner = signSection.getString("Owner", null);
+			String creatorUUIDString = signSection.getString("CreatorUUID");
+			UUID creatorUUID = Utils.parseUUID(creatorUUIDString);
+			if (creatorUUID == null && !Utils.isEmpty(creatorUUIDString)) {
+				this.getLogger().warning("Couldn't load sign (invalid creator uuid): " + node);
+				continue;
+			}
+			String creatorName = signSection.getString("CreatorLastKnownName");
+
+			String ownerUUIDString = signSection.getString("OwnerUUID");
+			UUID ownerUUID = Utils.parseUUID(ownerUUIDString);
+			if (ownerUUID == null && !Utils.isEmpty(ownerUUIDString)) {
+				this.getLogger().warning("Couldn't load sign (invalid owner uuid): " + node);
+				continue;
+			}
+			String ownerName = signSection.getString("OwnerLastKnownName");
+
 			int durationInDays = signSection.getInt("Duration", defaultDurationDays);
 			int price = signSection.getInt("Price", defaultPrice);
 			long startTime = signSection.getLong("StartTime", 0L);
 
-			signs.add(new BillboardSign(signLocation, creator, owner, durationInDays, price, startTime));
+			BillboardSign billboard = new BillboardSign(signLocation, creatorUUID, creatorName, ownerUUID, ownerName, durationInDays, price, startTime);
+			this.addBillboard(billboard);
 		}
 	}
 
-	public boolean saveSigns() {
+	public boolean saveBillboards() {
 		YamlConfiguration signsData = new YamlConfiguration();
 		// store signs in signs data config:
-		for (BillboardSign billboard : signs) {
-			String node = "Signs." + billboard.getLocation().toString();
-			signsData.set(node + ".Creator", billboard.getCreatorName());
-			signsData.set(node + ".Owner", billboard.getOwnerName());
+		for (BillboardSign billboard : billboardsView) {
+			String node = billboard.getLocation().toString();
+			signsData.set(node + ".CreatorUUID", billboard.getCreatorUUID());
+			signsData.set(node + ".CreatorLastKnownName", billboard.getLastKnownCreatorName());
+			signsData.set(node + ".OwnerUUID", billboard.getOwnerUUID());
+			signsData.set(node + ".OwnerLastKnownName", billboard.getLastKnownOwnerName());
 			signsData.set(node + ".Duration", billboard.getDurationInDays());
 			signsData.set(node + ".Price", billboard.getPrice());
 			signsData.set(node + ".StartTime", billboard.getStartTime());
 		}
 
 		// save signs data to file:
-		File signsDataFile = this.getSignsDataFile();
+		File signsDataFile = this.getBillboardsDataFile();
 		File parent = signsDataFile.getParentFile();
 		if (parent != null) {
 			parent.mkdirs();
 		}
 		String data = signsData.saveToString();
 		try (	FileOutputStream stream = new FileOutputStream(signsDataFile);
-				OutputStreamWriter writer = new OutputStreamWriter(stream, SIGNS_DATA_FILE_ENCODING)) {
+				OutputStreamWriter writer = new OutputStreamWriter(stream, BILLBOARDS_DATA_FILE_ENCODING)) {
 			writer.write(data);
 		} catch (Exception e) {
-			this.getLogger().log(Level.SEVERE, "Failed to save signs data file!", e);
+			this.getLogger().log(Level.SEVERE, "Failed to save billboards data file!", e);
 			return false;
 		}
 		return true;
