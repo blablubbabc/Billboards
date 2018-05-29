@@ -3,6 +3,7 @@ package de.blablubbabc.billboards.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -10,7 +11,7 @@ import org.bukkit.block.Block;
 
 public class SoftBlockLocation {
 
-	private final String worldName;
+	private final String worldName; // not empty
 	private final int x;
 	private final int y;
 	private final int z;
@@ -24,6 +25,7 @@ public class SoftBlockLocation {
 	}
 
 	public SoftBlockLocation(String worldName, int x, int y, int z) {
+		Validate.isTrue(!Utils.isEmpty(worldName), "World name is empty!");
 		this.worldName = worldName;
 		this.x = x;
 		this.y = y;
@@ -57,8 +59,33 @@ public class SoftBlockLocation {
 		return location.getWorld().getName().equals(worldName) && location.getBlockX() == x && location.getBlockY() == y && location.getBlockZ() == z;
 	}
 
+	@Override
 	public String toString() {
 		return worldName + ";" + x + ";" + y + ";" + z;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + worldName.hashCode();
+		result = prime * result + x;
+		result = prime * result + y;
+		result = prime * result + z;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (!(obj instanceof SoftBlockLocation)) return false;
+		SoftBlockLocation other = (SoftBlockLocation) obj;
+		if (!worldName.equals(other.worldName)) return false;
+		if (x != other.x) return false;
+		if (y != other.y) return false;
+		if (z != other.z) return false;
+		return true;
 	}
 
 	// statics
