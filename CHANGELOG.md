@@ -2,10 +2,14 @@
 Date format: (YYYY-MM-DD)  
 
 ## Next release
-### Supported MC versions: xxx
-* Fixed support for Bukkit 1.12.1 and above.
-* Major internal refactoring.
+### Supported MC versions: 1.12, 1.11, 1.10, 1.9, 1.8
+* UUID update:
+  * All players are now identifier by uuids instead of names. Make sure that your economy plugin supports Vault's OfflinePlayer (UUID) API.
+  * Added message parameters for creator and owner uuids. Some messages might have changed and new messages for unknown names, unknown uuid and server owner name have been added. If you are updating, please let it regenerate the messages file.
 * Signs data is now stored in a separate file (signs.yml). Old data does not get imported!
+* Fixed support for Bukkit 1.12.1 and above.
+* Fix: Players can only break signs they are the creator of if the sign isn't currently owned by some other player.
+* Major internal refactoring and cleanup.
 
 ## v1.6 Release (2015-07-26)
 ### Supported MC versions: 1.8, 1.7.9

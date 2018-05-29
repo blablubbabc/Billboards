@@ -182,6 +182,7 @@ public class BillboardsPlugin extends JavaPlugin {
 			Location location = billboard.getLocation().getBukkitLocation();
 			if (location == null) {
 				// TODO really remove? what if the world is only temporarily unloaded?
+				// TODO add a cleanup command instead?
 				this.getLogger().warning("World '" + billboard.getLocation().getWorldName() + "' not found. Removing this billboard sign.");
 				forRemoval.add(billboard);
 				continue;
