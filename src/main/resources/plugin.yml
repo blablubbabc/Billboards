@@ -1,5 +1,5 @@
 name: Billboards
-main: de.blablubbabc.billboards.Billboards
+main: de.blablubbabc.billboards.BillboardsPlugin
 version: '${project.version}'
 author: blablubbabc
 description: Rent-able signs.
@@ -8,7 +8,7 @@ commands:
     billboard:
       description: Used to add a sign.
       usage: /<command> [<price> <duration>] [creator]
-      aliases: adsign
+      aliases: [billboards, adsign]
 permissions:
   billboards.rent:
     description: Can rent and edit own billboard signs.

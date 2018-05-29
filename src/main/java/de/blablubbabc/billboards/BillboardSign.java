@@ -1,15 +1,17 @@
 package de.blablubbabc.billboards;
 
+import de.blablubbabc.billboards.util.SoftBlockLocation;
+
 public class BillboardSign {
 
-	private SoftLocation location;
+	private SoftBlockLocation location;
 	private String creatorName;
 	private String ownerName;
 	private int durationInDays;
 	private int price;
 	private long startTime;
 
-	public BillboardSign(SoftLocation location, String creatorName, String ownerName, int durationInDays, int price, long startTime) {
+	public BillboardSign(SoftBlockLocation location, String creatorName, String ownerName, int durationInDays, int price, long startTime) {
 		this.location = location;
 		this.creatorName = (creatorName == null || creatorName.isEmpty()) ? "SERVER" : creatorName;
 		this.ownerName = (ownerName == null || ownerName.isEmpty()) ? "SERVER" : ownerName;
@@ -18,11 +20,11 @@ public class BillboardSign {
 		this.startTime = startTime;
 	}
 
-	public SoftLocation getLocation() {
+	public SoftBlockLocation getLocation() {
 		return location;
 	}
 
-	public void setLocation(SoftLocation location) {
+	public void setLocation(SoftBlockLocation location) {
 		this.location = location;
 	}
 

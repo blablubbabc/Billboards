@@ -1,47 +1,57 @@
 package de.blablubbabc.billboards;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Player;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import de.blablubbabc.billboards.util.SoftBlockLocation;
+import de.blablubbabc.billboards.util.Utils;
+
 import net.milkbowl.vault.economy.Economy;
 
-public class Billboards extends JavaPlugin {
+public class BillboardsPlugin extends JavaPlugin {
 
-	public static Billboards instance;
+	private static BillboardsPlugin instance;
+
+	public BillboardsPlugin getInstance() {
+		return instance;
+	}
+
 	public static Economy economy = null;
 	public static final String ADMIN_PERMISSION = "billboards.admin";
 	public static final String RENT_PERMISSION = "billboards.rent";
 	public static final String CREATE_PERMISSION = "billboards.create";
 
-	public static String trimTo16(String input) {
-		return input.length() > 16 ? input.substring(0, 16) : input;
-	}
+	private static final String SIGNS_DATA_FILE = "signs.yml";
+	private static final String SIGNS_DATA_FILE_ENCODING = "UTF-8";
 
+	// settings:
 	public int defaultPrice = 10;
 	public int defaultDurationDays = 7;
 	public int maxRent = -1; // no limit by default
 	public boolean bypassSignChangeBlocking = false;
 
-	public final Map<String, BillboardSign> customers = new HashMap<String, BillboardSign>();
-
-	private List<BillboardSign> signs = new ArrayList<BillboardSign>();
+	// data:
+	private final Set<BillboardSign> signs = new LinkedHashSet<>();
 
 	@Override
 	public void onEnable() {
@@ -52,14 +62,21 @@ public class Billboards extends JavaPlugin {
 			return;
 		}
 
-		// load messages
-		Messages.loadMessages("plugins" + File.separator + "Billboards" + File.separator + "messages.yml");
+		// load messages:
+		Messages.loadMessages("plugins" + File.separator + "Billboards" + File.separator + "messages.yml", this.getLogger());
 
-		// load config and signs:
-		this.loadConfig();
+		// load config (and write defaults back to file):
+		this.reloadConfig();
 
-		// register listener
-		Bukkit.getPluginManager().registerEvents(new EventListener(), this);
+		// loads signs:
+		this.loadSigns();
+
+		// register listener:
+		Bukkit.getPluginManager().registerEvents(new EventListener(this), this);
+
+		// register command handler:
+		BillboardCommands commands = new BillboardCommands(this);
+		this.getCommand("billboard").setExecutor(commands);
 
 		// start refresh timer:
 		Bukkit.getScheduler().runTaskTimer(this, new Runnable() {
@@ -77,92 +94,22 @@ public class Billboards extends JavaPlugin {
 		instance = null;
 	}
 
-	@Override
-	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		if (!(sender instanceof Player)) {
-			sender.sendMessage(Messages.getMessage(Message.ONLY_AS_PLAYER));
-			return true;
-		}
-		Player player = (Player) sender;
-		boolean hasAdminPermission = player.hasPermission(ADMIN_PERMISSION);
-		if (hasAdminPermission || player.hasPermission(CREATE_PERMISSION)) {
-			if (args.length > 3) {
-				return false;
-			}
-
-			Block block = player.getTargetBlock((Set<Material>) null, 10);
-			if (block == null || !(block.getType() == Material.SIGN_POST || block.getType() == Material.WALL_SIGN)) {
-				player.sendMessage(Messages.getMessage(Message.NO_TARGETED_SIGN));
-			} else {
-				Location loc = block.getLocation();
-				if (getBillboard(loc) != null) {
-					player.sendMessage(Messages.getMessage(Message.ALREADY_BILLBOARD_SIGN));
-				} else {
-					int duration = defaultDurationDays;
-					int price = defaultPrice;
-
-					// /billboard [<price> <duration>] [creator]
-					if (args.length >= 2) {
-						Integer priceArgument = parseInteger(args[0]);
-						if (priceArgument == null) {
-							player.sendMessage(Messages.getMessage(Message.INVALID_NUMBER, args[0]));
-							return true;
-						}
-						Integer durationArgument = parseInteger(args[1]);
-						if (durationArgument == null) {
-							player.sendMessage(Messages.getMessage(Message.INVALID_NUMBER, args[1]));
-							return true;
-						}
-						price = priceArgument.intValue();
-						duration = durationArgument.intValue();
-					}
-
-					String creator = hasAdminPermission ? null : player.getName();
-
-					if (args.length == 1 || args.length == 3) {
-						if (hasAdminPermission) {
-							creator = args[args.length == 1 ? 0 : 2];
-						} else {
-							player.sendMessage(Messages.getMessage(Message.NO_PERMISSION));
-							return true;
-						}
-					}
-
-					BillboardSign billboard = new BillboardSign(new SoftLocation(loc.getWorld().getName(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()), creator, null, duration, price, 0);
-					signs.add(billboard);
-					refreshSign(billboard);
-					saveCurrentConfig();
-
-					player.sendMessage(Messages.getMessage(Message.ADDED_SIGN, String.valueOf(price), String.valueOf(duration), billboard.getCreatorName()));
-				}
-			}
-		} else {
-			player.sendMessage(Messages.getMessage(Message.NO_PERMISSION));
-		}
-
-		return true;
-	}
-
-	private Integer parseInteger(String string) {
-		try {
-			return Integer.parseInt(string);
-		} catch (NumberFormatException e) {
-			return null;
-		}
-	}
-
 	private boolean setupEconomy() {
 		RegisteredServiceProvider<Economy> economyProvider = Bukkit.getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
 		if (economyProvider != null) {
 			economy = economyProvider.getProvider();
 		}
-
 		return (economy != null);
+	}
+
+	// BILLBOARDS
+
+	public void addBillboard(BillboardSign billboard) {
+		signs.add(billboard);
 	}
 
 	public void removeBillboard(BillboardSign billboard) {
 		signs.remove(billboard);
-		saveCurrentConfig();
 	}
 
 	public BillboardSign getBillboard(Location loc) {
@@ -192,7 +139,8 @@ public class Billboards extends JavaPlugin {
 		Location location = billboard.getLocation().getBukkitLocation(this);
 		if (location == null) {
 			this.getLogger().warning("World '" + billboard.getLocation().getWorldName() + "' not found. Removing this billboard sign.");
-			removeBillboard(billboard);
+			this.removeBillboard(billboard);
+			this.saveSigns();
 			return false;
 		}
 
@@ -200,7 +148,8 @@ public class Billboards extends JavaPlugin {
 		Material type = block.getType();
 		if (type != Material.WALL_SIGN && type != Material.SIGN_POST) {
 			this.getLogger().warning("Billboard '" + billboard.getLocation().toString() + "' is no longer a sign. Removing this billboard sign.");
-			removeBillboard(billboard);
+			this.removeBillboard(billboard);
+			this.saveSigns();
 			return false;
 		}
 
@@ -211,7 +160,7 @@ public class Billboards extends JavaPlugin {
 		// update text if it has no owner:
 		if (!billboard.hasOwner()) {
 			Sign sign = (Sign) block.getState();
-			setRentableText(billboard, sign);
+			this.setRentableText(billboard, sign);
 		}
 
 		return true;
@@ -220,10 +169,10 @@ public class Billboards extends JavaPlugin {
 	private void setRentableText(BillboardSign billboard, Sign sign) {
 		String[] args = new String[] { String.valueOf(billboard.getPrice()), String.valueOf(billboard.getDurationInDays()), billboard.getCreatorName() };
 
-		sign.setLine(0, trimTo16(Messages.getMessage(Message.SIGN_LINE_1, args)));
-		sign.setLine(1, trimTo16(Messages.getMessage(Message.SIGN_LINE_2, args)));
-		sign.setLine(2, trimTo16(Messages.getMessage(Message.SIGN_LINE_3, args)));
-		sign.setLine(3, trimTo16(Messages.getMessage(Message.SIGN_LINE_4, args)));
+		sign.setLine(0, Utils.trimTo16(Messages.getMessage(Message.SIGN_LINE_1, args)));
+		sign.setLine(1, Utils.trimTo16(Messages.getMessage(Message.SIGN_LINE_2, args)));
+		sign.setLine(2, Utils.trimTo16(Messages.getMessage(Message.SIGN_LINE_3, args)));
+		sign.setLine(3, Utils.trimTo16(Messages.getMessage(Message.SIGN_LINE_4, args)));
 		sign.update();
 	}
 
@@ -257,16 +206,17 @@ public class Billboards extends JavaPlugin {
 		// remove invalid billboards:
 		if (forRemoval.size() > 0) {
 			for (BillboardSign billboard : forRemoval) {
-				signs.remove(billboard);
+				this.removeBillboard(billboard);
 			}
-			saveCurrentConfig();
+			this.saveSigns();
 		}
 	}
 
-	public void loadConfig() {
-		FileConfiguration config = this.getConfig();
-
+	@Override
+	public void reloadConfig() {
+		super.reloadConfig();
 		// load settings:
+		FileConfiguration config = this.getConfig();
 		ConfigurationSection settingsSection = config.getConfigurationSection("Settings");
 		if (settingsSection != null) {
 			defaultPrice = settingsSection.getInt("DefaultPrice", 10);
@@ -274,60 +224,92 @@ public class Billboards extends JavaPlugin {
 			maxRent = settingsSection.getInt("MaxRentPerPlayer", -1);
 			bypassSignChangeBlocking = settingsSection.getBoolean("BypassSignChangeBlocking", false);
 		}
-
-		// load signs:
-		ConfigurationSection signsSection = config.getConfigurationSection("Signs");
-		if (signsSection != null) {
-			for (String softString : signsSection.getKeys(false)) {
-
-				ConfigurationSection signSection = signsSection.getConfigurationSection(softString);
-				if (signSection == null) {
-					this.getLogger().warning("Couldn't load a sign section: " + softString);
-					continue;
-				}
-
-				SoftLocation soft = SoftLocation.getFromString(softString);
-				if (soft == null) {
-					this.getLogger().warning("Couldn't load a signs location: " + softString);
-					continue;
-				}
-
-				String creator = signSection.getString("Creator", null);
-				String owner = signSection.getString("Owner", null);
-				int durationInDays = signSection.getInt("Duration", defaultDurationDays);
-				int price = signSection.getInt("Price", defaultPrice);
-				long startTime = signSection.getLong("StartTime", 0L);
-
-				signs.add(new BillboardSign(soft, creator, owner, durationInDays, price, startTime));
-			}
-		}
-
 		// write changes back to config:
-		this.saveCurrentConfig();
+		this.saveConfig();
 	}
 
-	public void saveCurrentConfig() {
+	@Override
+	public void saveConfig() {
+		// write current settings to config:
 		FileConfiguration config = this.getConfig();
-
-		// write settings to config:
 		config.set("Settings.DefaultPrice", defaultPrice);
 		config.set("Settings.DefaultDurationInDays", defaultDurationDays);
 		config.set("Settings.MaxRentPerPlayer", maxRent);
 		config.set("Settings.BypassSignChangeBlocking", bypassSignChangeBlocking);
+		super.saveConfig();
+	}
 
-		// write signs to config:
-		// first clear signs section:
-		config.set("Signs", null);
-		// then insert current information:
-		for (BillboardSign billboard : signs) {
-			String node = "Signs." + billboard.getLocation().toString();
-			config.set(node + ".Creator", billboard.getCreatorName());
-			config.set(node + ".Owner", billboard.getOwnerName());
-			config.set(node + ".Duration", billboard.getDurationInDays());
-			config.set(node + ".Price", billboard.getPrice());
-			config.set(node + ".StartTime", billboard.getStartTime());
+	private File getSignsDataFile() {
+		return new File(this.getDataFolder(), SIGNS_DATA_FILE);
+	}
+
+	private void loadSigns() {
+		// loads signs data from file:
+		File signsDataFile = this.getSignsDataFile();
+		YamlConfiguration signsData = new YamlConfiguration();
+		try (	FileInputStream stream = new FileInputStream(signsDataFile);
+				InputStreamReader reader = new InputStreamReader(stream, SIGNS_DATA_FILE_ENCODING)) {
+			signsData.load(reader);
+		} catch (FileNotFoundException ex) {
+			// ignore
+		} catch (Exception e) {
+			this.getLogger().log(Level.SEVERE, "Failed to load signs data file!", e);
+			return;
 		}
 
-		this.saveConfig();
+		// unload currently loaded signs:
+		signs.clear();
+
+		// freshly load signs:
+		for (String signLocationString : signsData.getKeys(false)) {
+			ConfigurationSection signSection = signsData.getConfigurationSection(signLocationString);
+			if (signSection == null) {
+				this.getLogger().warning("Couldn't load sign (invalid config section): " + signLocationString);
+				continue;
+			}
+
+			SoftBlockLocation signLocation = SoftBlockLocation.getFromString(signLocationString);
+			if (signLocation == null) {
+				this.getLogger().warning("Couldn't load sign (invalid location): " + signLocationString);
+				continue;
+			}
+
+			String creator = signSection.getString("Creator", null);
+			String owner = signSection.getString("Owner", null);
+			int durationInDays = signSection.getInt("Duration", defaultDurationDays);
+			int price = signSection.getInt("Price", defaultPrice);
+			long startTime = signSection.getLong("StartTime", 0L);
+
+			signs.add(new BillboardSign(signLocation, creator, owner, durationInDays, price, startTime));
+		}
+	}
+
+	public boolean saveSigns() {
+		YamlConfiguration signsData = new YamlConfiguration();
+		// store signs in signs data config:
+		for (BillboardSign billboard : signs) {
+			String node = "Signs." + billboard.getLocation().toString();
+			signsData.set(node + ".Creator", billboard.getCreatorName());
+			signsData.set(node + ".Owner", billboard.getOwnerName());
+			signsData.set(node + ".Duration", billboard.getDurationInDays());
+			signsData.set(node + ".Price", billboard.getPrice());
+			signsData.set(node + ".StartTime", billboard.getStartTime());
+		}
+
+		// save signs data to file:
+		File signsDataFile = this.getSignsDataFile();
+		File parent = signsDataFile.getParentFile();
+		if (parent != null) {
+			parent.mkdirs();
+		}
+		String data = signsData.saveToString();
+		try (	FileOutputStream stream = new FileOutputStream(signsDataFile);
+				OutputStreamWriter writer = new OutputStreamWriter(stream, SIGNS_DATA_FILE_ENCODING)) {
+			writer.write(data);
+		} catch (Exception e) {
+			this.getLogger().log(Level.SEVERE, "Failed to save signs data file!", e);
+			return false;
+		}
+		return true;
 	}
 }

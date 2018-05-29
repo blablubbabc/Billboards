@@ -1,20 +1,29 @@
-package de.blablubbabc.billboards;
+package de.blablubbabc.billboards.util;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.plugin.Plugin;
 
-public class SoftLocation {
+public class SoftBlockLocation {
 
 	private String worldName;
 	private int x;
 	private int y;
 	private int z;
 
-	public SoftLocation(String worldName, int x, int y, int z) {
+	public SoftBlockLocation(Block block) {
+		this(block.getWorld().getName(), block.getX(), block.getY(), block.getZ());
+	}
+
+	public SoftBlockLocation(Location location) {
+		this(location.getWorld().getName(), location.getBlockX(), location.getBlockY(), location.getBlockZ());
+	}
+
+	public SoftBlockLocation(String worldName, int x, int y, int z) {
 		this.worldName = worldName;
 		this.x = x;
 		this.y = y;
@@ -70,43 +79,35 @@ public class SoftLocation {
 
 	// statics
 
-	public static List<SoftLocation> getFromStringList(List<String> strings) {
-		List<SoftLocation> softLocs = new ArrayList<SoftLocation>();
+	public static List<SoftBlockLocation> getFromStringList(List<String> strings) {
+		List<SoftBlockLocation> softLocs = new ArrayList<SoftBlockLocation>();
 		for (String s : strings) {
-			SoftLocation soft = getFromString(s);
+			SoftBlockLocation soft = getFromString(s);
 			if (soft != null) softLocs.add(soft);
 		}
 		return softLocs;
 	}
 
-	public static List<String> toStringList(List<SoftLocation> softLocs) {
+	public static List<String> toStringList(List<SoftBlockLocation> softLocs) {
 		List<String> strings = new ArrayList<String>();
-		for (SoftLocation soft : softLocs) {
+		for (SoftBlockLocation soft : softLocs) {
 			if (soft != null) strings.add(soft.toString());
 		}
 		return strings;
 	}
 
-	public static SoftLocation getFromString(String string) {
+	public static SoftBlockLocation getFromString(String string) {
 		if (string == null) return null;
 		String[] split = string.split(";");
 		if (split.length != 4) return null;
 		String worldName = split[0];
 		if (worldName == null) return null;
-		Integer x = parseInteger(split[1]);
+		Integer x = Utils.parseInteger(split[1]);
 		if (x == null) return null;
-		Integer y = parseInteger(split[2]);
+		Integer y = Utils.parseInteger(split[2]);
 		if (y == null) return null;
-		Integer z = parseInteger(split[3]);
+		Integer z = Utils.parseInteger(split[3]);
 		if (z == null) return null;
-		return new SoftLocation(worldName, x, y, z);
-	}
-
-	private static Integer parseInteger(String s) {
-		try {
-			return Integer.parseInt(s);
-		} catch (Exception e) {
-			return null;
-		}
+		return new SoftBlockLocation(worldName, x, y, z);
 	}
 }

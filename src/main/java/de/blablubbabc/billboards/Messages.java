@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -14,7 +15,7 @@ class Messages {
 	private static String[] messages;
 
 	// loads messages from the messages.yml configuration file into memory
-	static void loadMessages(String messagesFilePath) {
+	static void loadMessages(String messagesFilePath, Logger logger) {
 		Message[] messageIDs = Message.values();
 		messages = new String[Message.values().length];
 
@@ -67,7 +68,7 @@ class Messages {
 			// if default is missing, log an error and use some fake data for
 			// now so that the plugin can run
 			if (messageData == null) {
-				Billboards.instance.getLogger().severe("Missing message for " + messageID.name() + ".  Please contact the developer.");
+				logger.severe("Missing message for " + messageID.name() + ".  Please contact the developer.");
 				messageData = new CustomizableMessage(messageID, "Missing message!  ID: " + messageID.name() + ".  Please contact a server admin.", null);
 			}
 
@@ -87,7 +88,7 @@ class Messages {
 		try {
 			config.save(messagesFilePath);
 		} catch (IOException exception) {
-			Billboards.instance.getLogger().severe("Unable to write to the configuration file at \"" + messagesFilePath + "\"");
+			logger.severe("Unable to write to the configuration file at \"" + messagesFilePath + "\"");
 		}
 
 		defaults.clear();
