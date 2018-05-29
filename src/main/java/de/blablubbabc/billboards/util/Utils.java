@@ -26,6 +26,7 @@ public class Utils {
 	}
 
 	public static UUID parseUUID(String string) {
+		if (string == null) return null;
 		try {
 			return UUID.fromString(string);
 		} catch (IllegalArgumentException e) {

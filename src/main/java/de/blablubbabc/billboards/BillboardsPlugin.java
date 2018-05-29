@@ -350,9 +350,9 @@ public class BillboardsPlugin extends JavaPlugin {
 		// store signs in signs data config:
 		for (BillboardSign billboard : billboardsView) {
 			String node = billboard.getLocation().toString();
-			signsData.set(node + ".creator-uuid", billboard.getCreatorUUID());
+			signsData.set(node + ".creator-uuid", getUUIDString(billboard.getCreatorUUID()));
 			signsData.set(node + ".creator-last-known-name", billboard.getLastKnownCreatorName());
-			signsData.set(node + ".owner-uuid", billboard.getOwnerUUID());
+			signsData.set(node + ".owner-uuid", getUUIDString(billboard.getOwnerUUID()));
 			signsData.set(node + ".owner-last-known-name", billboard.getLastKnownOwnerName());
 			signsData.set(node + ".duration", billboard.getDurationInDays());
 			signsData.set(node + ".price", billboard.getPrice());
@@ -374,5 +374,10 @@ public class BillboardsPlugin extends JavaPlugin {
 			return false;
 		}
 		return true;
+	}
+
+	private static String getUUIDString(UUID uuid) {
+		if (uuid == null) return null;
+		return uuid.toString();
 	}
 }
