@@ -173,8 +173,8 @@ public class EventListener implements Listener {
 			// check if available:
 			if (!billboard.hasOwner()) {
 				// check if the player already owns to many billboards:
-				if (plugin.maxRent >= 0 && plugin.getRentBillboards(player.getUniqueId()).size() >= plugin.maxRent) {
-					player.sendMessage(Messages.getMessage(Message.MAX_RENT_LIMIT_REACHED, String.valueOf(plugin.maxRent)));
+				if (plugin.maxBillboardsPerPlayer >= 0 && plugin.getRentBillboards(player.getUniqueId()).size() >= plugin.maxBillboardsPerPlayer) {
+					player.sendMessage(Messages.getMessage(Message.MAX_RENT_LIMIT_REACHED, String.valueOf(plugin.maxBillboardsPerPlayer)));
 					return;
 				}
 

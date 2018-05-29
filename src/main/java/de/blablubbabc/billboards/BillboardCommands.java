@@ -55,7 +55,7 @@ public class BillboardCommands implements CommandExecutor {
 		}
 
 		// create new billboard:
-		int duration = plugin.defaultDurationDays;
+		int duration = plugin.defaultDurationInDays;
 		int price = plugin.defaultPrice;
 
 		// /billboard [<price> <duration>] [creator]

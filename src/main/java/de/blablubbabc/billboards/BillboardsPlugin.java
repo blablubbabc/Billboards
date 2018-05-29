@@ -51,8 +51,8 @@ public class BillboardsPlugin extends JavaPlugin {
 
 	// settings:
 	public int defaultPrice = 10;
-	public int defaultDurationDays = 7;
-	public int maxRent = -1; // no limit by default
+	public int defaultDurationInDays = 7;
+	public int maxBillboardsPerPlayer = -1; // no limit by default
 	public boolean bypassSignChangeBlocking = false;
 
 	// data:
@@ -107,13 +107,10 @@ public class BillboardsPlugin extends JavaPlugin {
 		super.reloadConfig();
 		// load settings:
 		FileConfiguration config = this.getConfig();
-		ConfigurationSection settingsSection = config.getConfigurationSection("Settings");
-		if (settingsSection != null) {
-			defaultPrice = settingsSection.getInt("DefaultPrice", 10);
-			defaultDurationDays = settingsSection.getInt("DefaultDurationInDays", 7);
-			maxRent = settingsSection.getInt("MaxRentPerPlayer", -1);
-			bypassSignChangeBlocking = settingsSection.getBoolean("BypassSignChangeBlocking", false);
-		}
+		defaultPrice = config.getInt("default-price", 10);
+		defaultDurationInDays = config.getInt("default-duration-in-days", 7);
+		maxBillboardsPerPlayer = config.getInt("max-billboards-per-player", -1);
+		bypassSignChangeBlocking = config.getBoolean("bypass-sign-change-blocking", false);
 		// write changes back to config:
 		this.saveConfig();
 	}
@@ -122,10 +119,10 @@ public class BillboardsPlugin extends JavaPlugin {
 	public void saveConfig() {
 		// write current settings to config:
 		FileConfiguration config = this.getConfig();
-		config.set("Settings.DefaultPrice", defaultPrice);
-		config.set("Settings.DefaultDurationInDays", defaultDurationDays);
-		config.set("Settings.MaxRentPerPlayer", maxRent);
-		config.set("Settings.BypassSignChangeBlocking", bypassSignChangeBlocking);
+		config.set("default-price", defaultPrice);
+		config.set("default-duration-in-days", defaultDurationInDays);
+		config.set("max-billboards-per-player", maxBillboardsPerPlayer);
+		config.set("bypass-sign-change-blocking", bypassSignChangeBlocking);
 		super.saveConfig();
 	}
 
@@ -323,25 +320,25 @@ public class BillboardsPlugin extends JavaPlugin {
 				continue;
 			}
 
-			String creatorUUIDString = signSection.getString("CreatorUUID");
+			String creatorUUIDString = signSection.getString("creator-uuid");
 			UUID creatorUUID = Utils.parseUUID(creatorUUIDString);
 			if (creatorUUID == null && !Utils.isEmpty(creatorUUIDString)) {
 				this.getLogger().warning("Couldn't load sign (invalid creator uuid): " + node);
 				continue;
 			}
-			String creatorName = signSection.getString("CreatorLastKnownName");
+			String creatorName = signSection.getString("creator-last-known-name");
 
-			String ownerUUIDString = signSection.getString("OwnerUUID");
+			String ownerUUIDString = signSection.getString("owner-uuid");
 			UUID ownerUUID = Utils.parseUUID(ownerUUIDString);
 			if (ownerUUID == null && !Utils.isEmpty(ownerUUIDString)) {
 				this.getLogger().warning("Couldn't load sign (invalid owner uuid): " + node);
 				continue;
 			}
-			String ownerName = signSection.getString("OwnerLastKnownName");
+			String ownerName = signSection.getString("owner-last-known-name");
 
-			int durationInDays = signSection.getInt("Duration", defaultDurationDays);
-			int price = signSection.getInt("Price", defaultPrice);
-			long startTime = signSection.getLong("StartTime", 0L);
+			int durationInDays = signSection.getInt("duration", defaultDurationInDays);
+			int price = signSection.getInt("price", defaultPrice);
+			long startTime = signSection.getLong("start-time", 0L);
 
 			BillboardSign billboard = new BillboardSign(signLocation, creatorUUID, creatorName, ownerUUID, ownerName, durationInDays, price, startTime);
 			this.addBillboard(billboard);
@@ -353,13 +350,13 @@ public class BillboardsPlugin extends JavaPlugin {
 		// store signs in signs data config:
 		for (BillboardSign billboard : billboardsView) {
 			String node = billboard.getLocation().toString();
-			signsData.set(node + ".CreatorUUID", billboard.getCreatorUUID());
-			signsData.set(node + ".CreatorLastKnownName", billboard.getLastKnownCreatorName());
-			signsData.set(node + ".OwnerUUID", billboard.getOwnerUUID());
-			signsData.set(node + ".OwnerLastKnownName", billboard.getLastKnownOwnerName());
-			signsData.set(node + ".Duration", billboard.getDurationInDays());
-			signsData.set(node + ".Price", billboard.getPrice());
-			signsData.set(node + ".StartTime", billboard.getStartTime());
+			signsData.set(node + ".creator-uuid", billboard.getCreatorUUID());
+			signsData.set(node + ".creator-last-known-name", billboard.getLastKnownCreatorName());
+			signsData.set(node + ".owner-uuid", billboard.getOwnerUUID());
+			signsData.set(node + ".owner-last-known-name", billboard.getLastKnownOwnerName());
+			signsData.set(node + ".duration", billboard.getDurationInDays());
+			signsData.set(node + ".price", billboard.getPrice());
+			signsData.set(node + ".start-time", billboard.getStartTime());
 		}
 
 		// save signs data to file:

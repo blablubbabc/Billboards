@@ -81,14 +81,14 @@ class Messages {
 			}
 
 			// read the message from the file, use default if necessary
-			messages[messageID.ordinal()] = config.getString("Messages." + messageID.name() + ".Text", messageData.text);
-			config.set("Messages." + messageID.name() + ".Text", messages[messageID.ordinal()]);
+			messages[messageID.ordinal()] = config.getString(messageID.name() + ".Text", messageData.text);
+			config.set(messageID.name() + ".Text", messages[messageID.ordinal()]);
 			// translate colors
 			messages[messageID.ordinal()] = ChatColor.translateAlternateColorCodes('&', messages[messageID.ordinal()]);
 
 			if (messageData.notes != null) {
-				messageData.notes = config.getString("Messages." + messageID.name() + ".Notes", messageData.notes);
-				config.set("Messages." + messageID.name() + ".Notes", messageData.notes);
+				messageData.notes = config.getString(messageID.name() + ".Notes", messageData.notes);
+				config.set(messageID.name() + ".Notes", messageData.notes);
 			}
 		}
 
