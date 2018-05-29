@@ -252,10 +252,10 @@ public class BillboardsPlugin extends JavaPlugin {
 	private void setRentableText(BillboardSign billboard, Sign sign) {
 		String[] msgArgs = billboard.getMessageArgs();
 
-		sign.setLine(0, Utils.trimTo16(Messages.getMessage(Message.SIGN_LINE_1, msgArgs)));
-		sign.setLine(1, Utils.trimTo16(Messages.getMessage(Message.SIGN_LINE_2, msgArgs)));
-		sign.setLine(2, Utils.trimTo16(Messages.getMessage(Message.SIGN_LINE_3, msgArgs)));
-		sign.setLine(3, Utils.trimTo16(Messages.getMessage(Message.SIGN_LINE_4, msgArgs)));
+		sign.setLine(0, Messages.getMessage(Message.SIGN_LINE_1, msgArgs));
+		sign.setLine(1, Messages.getMessage(Message.SIGN_LINE_2, msgArgs));
+		sign.setLine(2, Messages.getMessage(Message.SIGN_LINE_3, msgArgs));
+		sign.setLine(3, Messages.getMessage(Message.SIGN_LINE_4, msgArgs));
 		sign.update();
 	}
 

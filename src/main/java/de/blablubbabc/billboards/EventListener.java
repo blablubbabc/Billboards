@@ -162,10 +162,10 @@ public class EventListener implements Listener {
 			// initialize new sign text:
 			Sign sign = (Sign) clickedBlock.getState();
 			String[] msgArgs = billboard.getMessageArgs();
-			sign.setLine(0, Utils.trimTo16(Messages.getMessage(Message.RENT_SIGN_LINE_1, msgArgs)));
-			sign.setLine(1, Utils.trimTo16(Messages.getMessage(Message.RENT_SIGN_LINE_2, msgArgs)));
-			sign.setLine(2, Utils.trimTo16(Messages.getMessage(Message.RENT_SIGN_LINE_3, msgArgs)));
-			sign.setLine(3, Utils.trimTo16(Messages.getMessage(Message.RENT_SIGN_LINE_4, msgArgs)));
+			sign.setLine(0, Messages.getMessage(Message.RENT_SIGN_LINE_1, msgArgs));
+			sign.setLine(1, Messages.getMessage(Message.RENT_SIGN_LINE_2, msgArgs));
+			sign.setLine(2, Messages.getMessage(Message.RENT_SIGN_LINE_3, msgArgs));
+			sign.setLine(3, Messages.getMessage(Message.RENT_SIGN_LINE_4, msgArgs));
 			sign.update();
 
 			player.sendMessage(Messages.getMessage(Message.YOU_HAVE_RENT_A_SIGN, msgArgs));
