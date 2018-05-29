@@ -10,10 +10,10 @@ import org.bukkit.plugin.Plugin;
 
 public class SoftBlockLocation {
 
-	private String worldName;
-	private int x;
-	private int y;
-	private int z;
+	private final String worldName;
+	private final int x;
+	private final int y;
+	private final int z;
 
 	public SoftBlockLocation(Block block) {
 		this(block.getWorld().getName(), block.getX(), block.getY(), block.getZ());
@@ -34,32 +34,16 @@ public class SoftBlockLocation {
 		return worldName;
 	}
 
-	public void setWorldName(String worldName) {
-		this.worldName = worldName;
-	}
-
 	public int getX() {
 		return x;
-	}
-
-	public void setX(int x) {
-		this.x = x;
 	}
 
 	public int getY() {
 		return y;
 	}
 
-	public void setY(int y) {
-		this.y = y;
-	}
-
 	public int getZ() {
 		return z;
-	}
-
-	public void setZ(int z) {
-		this.z = z;
 	}
 
 	public Location getBukkitLocation(Plugin plugin) {
