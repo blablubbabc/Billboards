@@ -28,7 +28,6 @@ Storage is still playername-based.
 ### Supported MC versions: 1.7.4, 1.6.4, 1.5.2, 1.4.7
 * Added: different sign text after the sign was rented
 * Changed: a lot of default messages and colors. I suggest to remove the messages.yml file to let it regenerate, if you are upgrading! 
-
 * Added (experimental!): player signs (very experimental state!)
   * Added permission node: 'billboards.create' which allows creating of billboard signs (default: false)
   * Signs can now have a "creator", who gets the money when his sign is rent by someone. If the deposit fails, it will try to refund the withdraw to the person which tries to rent the sign.
