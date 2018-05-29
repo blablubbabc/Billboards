@@ -3,7 +3,7 @@
 
 	<groupId>de.blablubbabc.billboards</groupId>
 	<artifactId>Billboards</artifactId>
-	<version>2.0</version>
+	<version>2.0.1</version>
 
 	<name>Billboards</name>
 	<url>https://dev.bukkit.org/projects/billboards</url>
