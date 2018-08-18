@@ -229,7 +229,7 @@ public class BillboardsPlugin extends JavaPlugin {
 
 		Block block = location.getBlock();
 		Material type = block.getType();
-		if (type != Material.WALL_SIGN && type != Material.SIGN_POST) {
+		if (type != Material.WALL_SIGN && type != Material.SIGN) {
 			this.getLogger().warning("Billboard '" + billboard.getLocation().toString() + "' is no longer a sign. Removing this billboard sign.");
 			this.removeBillboard(billboard);
 			this.saveBillboards();

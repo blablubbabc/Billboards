@@ -23,7 +23,9 @@ import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 import de.blablubbabc.billboards.util.SoftBlockLocation;
 import de.blablubbabc.billboards.util.Utils;
@@ -191,7 +193,7 @@ public class EventListener implements Listener {
 				player.sendMessage(Messages.getMessage(Message.CLICK_TO_RENT, billboard.getMessageArgs()));
 			} else {
 				// is owner -> edit
-				if (player.getItemInHand().getType() == Material.SIGN && billboard.canEdit(player)) {
+				if (event.getItem().getType() == Material.SIGN && billboard.canEdit(player)) {
 					// do not cancel, so that the place event is called:
 					event.setCancelled(false);
 					return;
@@ -223,6 +225,9 @@ public class EventListener implements Listener {
 	void onBlockPlaceEarly(BlockPlaceEvent event) {
 		Block placedBlock = event.getBlockPlaced();
 		if (!Utils.isSignBlock(placedBlock.getType())) return;
+		// making sure the player is actually holding a sign, just in case:
+		ItemStack itemInHand = event.getItemInHand();
+		if (itemInHand == null || itemInHand.getType() != Material.SIGN) return;
 
 		Block placedAgainstBlock = event.getBlockAgainst();
 		if (!Utils.isSignBlock(placedAgainstBlock.getType())) return;
@@ -238,7 +243,7 @@ public class EventListener implements Listener {
 		event.setCancelled(true);
 
 		if (billboard.canEdit(player)) {
-			editing.put(playerName, new SignEdit(placedBlock.getLocation(), billboard));
+			editing.put(playerName, new SignEdit(billboard, placedBlock.getLocation(), itemInHand.clone(), event.getHand()));
 		}
 	}
 
@@ -253,7 +258,6 @@ public class EventListener implements Listener {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = false)
 	void onSignEdit(SignChangeEvent event) {
 		Player player = event.getPlayer();
@@ -277,18 +281,50 @@ public class EventListener implements Listener {
 			}
 		}
 
-		// cancel and give sign back:
+		// cancel and give sign item back:
 		event.setCancelled(true);
 		signEdit.source.getBlock().setType(Material.AIR);
 		if (player.getGameMode() != GameMode.CREATIVE) {
-			ItemStack inHand = player.getItemInHand();
-			if (inHand == null || inHand.getType() == Material.AIR) {
-				player.setItemInHand(new ItemStack(Material.SIGN, 1));
-			} else if (inHand.getType() == Material.SIGN) {
-				inHand.setAmount(inHand.getAmount() + 1);
+			// return sign item:
+			ItemStack signItem = signEdit.originalSignItem.clone();
+			signItem.setAmount(1);
+
+			PlayerInventory playerInventory = player.getInventory();
+			if (!addItemToHand(playerInventory, signEdit.originalHand, signItem)) {
+				// hand full: try to add to inventory:
+				if (!playerInventory.addItem(signItem).isEmpty()) {
+					// inventory full: drop the item:
+					player.getWorld().dropItemNaturally(player.getEyeLocation(), signItem);
+				}
 			}
 			player.updateInventory();
 		}
+	}
+
+	private static boolean addItemToHand(PlayerInventory playerInventory, EquipmentSlot hand, ItemStack itemStack) {
+		if (hand == EquipmentSlot.HAND) {
+			// add to main hand:
+			ItemStack itemInMainHand = playerInventory.getItemInMainHand();
+			if (itemInMainHand == null || itemInMainHand.getType() == Material.AIR) {
+				playerInventory.setItemInMainHand(itemStack);
+				return true;
+			} else if (itemStack.isSimilar(itemInMainHand) && itemInMainHand.getAmount() < itemInMainHand.getMaxStackSize()) {
+				itemInMainHand.setAmount(itemInMainHand.getAmount() + 1);
+				return true;
+			}
+		} else if (hand == EquipmentSlot.OFF_HAND) {
+			// add to off hand:
+			ItemStack itemInOffHand = playerInventory.getItemInOffHand();
+			if (itemInOffHand == null || itemInOffHand.getType() == Material.AIR) {
+				playerInventory.setItemInOffHand(itemStack);
+				return true;
+			} else if (itemStack.isSimilar(itemInOffHand) && itemInOffHand.getAmount() < itemInOffHand.getMaxStackSize()) {
+				itemInOffHand.setAmount(itemInOffHand.getAmount() + 1);
+				return true;
+			}
+		}
+		// couldn't add the item:
+		return false;
 	}
 
 	@EventHandler

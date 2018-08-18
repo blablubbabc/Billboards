@@ -14,7 +14,7 @@ public class Utils {
 	}
 
 	public static boolean isSignBlock(Material material) {
-		return (material == Material.SIGN_POST || material == Material.WALL_SIGN);
+		return (material == Material.SIGN || material == Material.WALL_SIGN);
 	}
 
 	public static Integer parseInteger(String string) {
