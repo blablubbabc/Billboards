@@ -193,7 +193,8 @@ public class EventListener implements Listener {
 				player.sendMessage(Messages.getMessage(Message.CLICK_TO_RENT, billboard.getMessageArgs()));
 			} else {
 				// is owner -> edit
-				if (event.getItem().getType() == Material.SIGN && billboard.canEdit(player)) {
+				ItemStack itemInHand = event.getItem();
+				if (itemInHand != null && itemInHand.getType() == Material.SIGN && billboard.canEdit(player)) {
 					// do not cancel, so that the place event is called:
 					event.setCancelled(false);
 					return;
@@ -294,7 +295,8 @@ public class EventListener implements Listener {
 				// hand full: try to add to inventory:
 				if (!playerInventory.addItem(signItem).isEmpty()) {
 					// inventory full: drop the item:
-					player.getWorld().dropItemNaturally(player.getEyeLocation(), signItem);
+					Block block = event.getBlock();
+					block.getWorld().dropItem(block.getLocation().add(0.5D, 0.5D, 0.5D), signItem);
 				}
 			}
 			player.updateInventory();
