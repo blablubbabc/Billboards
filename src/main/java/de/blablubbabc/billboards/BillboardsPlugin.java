@@ -25,6 +25,11 @@ import org.bukkit.block.Sign;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -33,7 +38,7 @@ import de.blablubbabc.billboards.util.Utils;
 
 import net.milkbowl.vault.economy.Economy;
 
-public class BillboardsPlugin extends JavaPlugin {
+public class BillboardsPlugin extends JavaPlugin implements Listener {
 
 	private static BillboardsPlugin instance;
 
@@ -59,6 +64,11 @@ public class BillboardsPlugin extends JavaPlugin {
 	private final Map<SoftBlockLocation, BillboardSign> billboards = new LinkedHashMap<>();
 	private final Collection<BillboardSign> billboardsView = Collections.unmodifiableCollection(billboards.values());
 
+	// controllers:
+	private final SignInteraction signInteration = new SignInteraction(this);
+	private final SignProtection signProtection = new SignProtection(this);
+	private final SignEditing signEditing = new SignEditing(this);
+
 	@Override
 	public void onEnable() {
 		instance = this;
@@ -77,8 +87,11 @@ public class BillboardsPlugin extends JavaPlugin {
 		// loads signs:
 		this.loadBillboards();
 
-		// register listener:
-		Bukkit.getPluginManager().registerEvents(new EventListener(this), this);
+		// initialize controllers:
+		Bukkit.getPluginManager().registerEvents(this, this);
+		signInteration.onPluginEnable();
+		signProtection.onPluginEnable();
+		signEditing.onPluginEnable();
 
 		// register command handler:
 		BillboardCommands commands = new BillboardCommands(this);
@@ -96,6 +109,11 @@ public class BillboardsPlugin extends JavaPlugin {
 
 	@Override
 	public void onDisable() {
+		// inform controllers:
+		signInteration.onPluginDisable();
+		signProtection.onPluginDisable();
+		signEditing.onPluginDisable();
+
 		Bukkit.getScheduler().cancelTasks(this);
 		instance = null;
 	}
@@ -257,6 +275,12 @@ public class BillboardsPlugin extends JavaPlugin {
 		sign.setLine(2, Messages.getMessage(Message.SIGN_LINE_3, msgArgs));
 		sign.setLine(3, Messages.getMessage(Message.SIGN_LINE_4, msgArgs));
 		sign.update();
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	void onPlayerJoin(PlayerJoinEvent event) {
+		Player player = event.getPlayer();
+		this.updateLastKnownName(player.getUniqueId(), player.getName());
 	}
 
 	// updates last known names for the specified player:

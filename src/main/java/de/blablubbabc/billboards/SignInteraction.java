@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
@@ -17,66 +16,33 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 
 import de.blablubbabc.billboards.util.SoftBlockLocation;
 import de.blablubbabc.billboards.util.Utils;
 
 import net.milkbowl.vault.economy.EconomyResponse;
 
-public class EventListener implements Listener {
+public class SignInteraction implements Listener {
 
 	private final BillboardsPlugin plugin;
-	private final SimpleDateFormat dateFormat = new SimpleDateFormat(Messages.getMessage(Message.DATE_FORMAT));
-
-	// player name -> editing information
-	private final Map<String, SignEdit> editing = new HashMap<String, SignEdit>();
 	// player name -> currently interacting billboard sign
 	public final Map<String, BillboardSign> confirmations = new HashMap<String, BillboardSign>();
+	private SimpleDateFormat dateFormat;
 
-	EventListener(BillboardsPlugin plugin) {
+	SignInteraction(BillboardsPlugin plugin) {
 		this.plugin = plugin;
 	}
 
-	@EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
-	void onBlockBreak(BlockBreakEvent event) {
-		// only allow breaking if has permission and is sneaking
-		Player player = event.getPlayer();
-		Block block = event.getBlock();
-		SoftBlockLocation blockLocation = new SoftBlockLocation(block);
-		BillboardSign billboard = plugin.getBillboard(blockLocation);
-		if (billboard == null) return;
-		if (!plugin.refreshSign(billboard)) return; // billboard is no longer valid
+	void onPluginEnable() {
+		dateFormat = new SimpleDateFormat(Messages.getMessage(Message.DATE_FORMAT));
+		plugin.getServer().getPluginManager().registerEvents(this, plugin);
+	}
 
-		boolean breakFailed = false;
-		if (!player.isSneaking()) {
-			breakFailed = true;
-			player.sendMessage(Messages.getMessage(Message.YOU_HAVE_TO_SNEAK));
-		} else if (!billboard.canBreak(player)) {
-			breakFailed = true;
-			player.sendMessage(Messages.getMessage(Message.NO_PERMISSION));
-		}
-
-		if (breakFailed) {
-			event.setCancelled(true);
-			plugin.getServer().getScheduler().runTask(plugin, () -> {
-				// refresh sign to display text:
-				plugin.refreshSign(billboard);
-			});
-		} else {
-			// remove billboard:
-			plugin.removeBillboard(billboard);
-			plugin.saveBillboards();
-			player.sendMessage(Messages.getMessage(Message.SIGN_REMOVED));
-		}
+	void onPluginDisable() {
+		this.confirmations.clear();
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
@@ -195,7 +161,7 @@ public class EventListener implements Listener {
 				// is owner -> edit
 				ItemStack itemInHand = event.getItem();
 				if (itemInHand != null && itemInHand.getType() == Material.SIGN && billboard.canEdit(player)) {
-					// do not cancel, so that the place event is called:
+					// do not cancel, so that the block place event is called that initializes sign editing:
 					event.setCancelled(false);
 					return;
 				}
@@ -222,121 +188,9 @@ public class EventListener implements Listener {
 		}
 	}
 
-	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
-	void onBlockPlaceEarly(BlockPlaceEvent event) {
-		Block placedBlock = event.getBlockPlaced();
-		if (!Utils.isSignBlock(placedBlock.getType())) return;
-		// making sure the player is actually holding a sign, just in case:
-		ItemStack itemInHand = event.getItemInHand();
-		if (itemInHand == null || itemInHand.getType() != Material.SIGN) return;
-
-		Block placedAgainstBlock = event.getBlockAgainst();
-		if (!Utils.isSignBlock(placedAgainstBlock.getType())) return;
-
-		SoftBlockLocation placedAgainstBlockLocation = new SoftBlockLocation(placedAgainstBlock);
-		BillboardSign billboard = plugin.getBillboard(placedAgainstBlockLocation);
-		if (billboard == null) return;
-
-		Player player = event.getPlayer();
-		String playerName = player.getName();
-
-		// cancel event, so other plugins ignore it and don't print messages for canceling it:
-		event.setCancelled(true);
-
-		if (billboard.canEdit(player)) {
-			editing.put(playerName, new SignEdit(billboard, placedBlock.getLocation(), itemInHand.clone(), event.getHand()));
-		}
-	}
-
-	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
-	void onBlockPlaceLate(BlockPlaceEvent event) {
-		Player player = event.getPlayer();
-		String playerName = player.getName();
-
-		if (editing.containsKey(playerName)) {
-			// make sure the sign can be placed, so that the sign edit window opens for the player
-			event.setCancelled(false);
-		}
-	}
-
-	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = false)
-	void onSignEdit(SignChangeEvent event) {
-		Player player = event.getPlayer();
-		String playerName = player.getName();
-		SignEdit signEdit = editing.remove(playerName);
-		if (signEdit == null) return;
-
-		if (plugin.refreshSign(signEdit.billboard)) {
-			// still owner and has still the permission?
-			if (signEdit.billboard.canEdit(player) && player.hasPermission(BillboardsPlugin.RENT_PERMISSION)) {
-				if (!event.isCancelled() || plugin.bypassSignChangeBlocking) {
-					// update billboard sign content:
-					Sign target = (Sign) signEdit.billboard.getLocation().getBukkitLocation().getBlock().getState();
-					for (int i = 0; i < 4; i++) {
-						target.setLine(i, event.getLine(i));
-					}
-					target.update();
-				} else {
-					// some other plugin cancelled sign updating (ex. anti-swearing plugins):
-				}
-			}
-		}
-
-		// cancel and give sign item back:
-		event.setCancelled(true);
-		signEdit.source.getBlock().setType(Material.AIR);
-		if (player.getGameMode() != GameMode.CREATIVE) {
-			// return sign item:
-			ItemStack signItem = signEdit.originalSignItem.clone();
-			signItem.setAmount(1);
-
-			PlayerInventory playerInventory = player.getInventory();
-			if (!addItemToHand(playerInventory, signEdit.originalHand, signItem)) {
-				// hand full: try to add to inventory:
-				if (!playerInventory.addItem(signItem).isEmpty()) {
-					// inventory full: drop the item:
-					Block block = event.getBlock();
-					block.getWorld().dropItem(block.getLocation().add(0.5D, 0.5D, 0.5D), signItem);
-				}
-			}
-			player.updateInventory();
-		}
-	}
-
-	private static boolean addItemToHand(PlayerInventory playerInventory, EquipmentSlot hand, ItemStack itemStack) {
-		if (hand == EquipmentSlot.HAND) {
-			// add to main hand:
-			ItemStack itemInMainHand = playerInventory.getItemInMainHand();
-			if (itemInMainHand == null || itemInMainHand.getType() == Material.AIR) {
-				playerInventory.setItemInMainHand(itemStack);
-				return true;
-			} else if (itemStack.isSimilar(itemInMainHand) && itemInMainHand.getAmount() < itemInMainHand.getMaxStackSize()) {
-				itemInMainHand.setAmount(itemInMainHand.getAmount() + 1);
-				return true;
-			}
-		} else if (hand == EquipmentSlot.OFF_HAND) {
-			// add to off hand:
-			ItemStack itemInOffHand = playerInventory.getItemInOffHand();
-			if (itemInOffHand == null || itemInOffHand.getType() == Material.AIR) {
-				playerInventory.setItemInOffHand(itemStack);
-				return true;
-			} else if (itemStack.isSimilar(itemInOffHand) && itemInOffHand.getAmount() < itemInOffHand.getMaxStackSize()) {
-				itemInOffHand.setAmount(itemInOffHand.getAmount() + 1);
-				return true;
-			}
-		}
-		// couldn't add the item:
-		return false;
-	}
-
 	@EventHandler
 	void onQuit(PlayerQuitEvent event) {
-		confirmations.remove(event.getPlayer().getName());
-	}
-
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	void onPlayerJoin(PlayerJoinEvent event) {
 		Player player = event.getPlayer();
-		plugin.updateLastKnownName(player.getUniqueId(), player.getName());
+		confirmations.remove(player.getName());
 	}
 }
