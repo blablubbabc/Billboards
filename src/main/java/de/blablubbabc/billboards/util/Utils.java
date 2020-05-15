@@ -13,8 +13,9 @@ public class Utils {
 		return (string == null || string.isEmpty());
 	}
 
-	public static boolean isSignBlock(Material material) {
-		return (material == Material.SIGN || material == Material.WALL_SIGN);
+	public static boolean isSign(Material material) {
+		if (material == null) return false;
+		return material.data == org.bukkit.block.data.type.Sign.class || material.data == org.bukkit.block.data.type.WallSign.class;
 	}
 
 	public static Integer parseInteger(String string) {

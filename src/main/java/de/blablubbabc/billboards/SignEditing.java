@@ -45,13 +45,13 @@ public class SignEditing implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
 	void onBlockPlaceEarly(BlockPlaceEvent event) {
 		Block placedBlock = event.getBlockPlaced();
-		if (!Utils.isSignBlock(placedBlock.getType())) return;
+		if (!Utils.isSign(placedBlock.getType())) return;
 		// making sure the player is actually holding a sign, just in case:
 		ItemStack itemInHand = event.getItemInHand();
-		if (itemInHand == null || itemInHand.getType() != Material.SIGN) return;
+		if (itemInHand == null || !Utils.isSign(itemInHand.getType())) return;
 
 		Block placedAgainstBlock = event.getBlockAgainst();
-		if (!Utils.isSignBlock(placedAgainstBlock.getType())) return;
+		if (!Utils.isSign(placedAgainstBlock.getType())) return;
 
 		SoftBlockLocation placedAgainstBlockLocation = new SoftBlockLocation(placedAgainstBlock);
 		BillboardSign billboard = plugin.getBillboard(placedAgainstBlockLocation);

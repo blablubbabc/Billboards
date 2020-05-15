@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
@@ -54,7 +53,7 @@ public class SignInteraction implements Listener {
 
 		// reset confirmation status:
 		BillboardSign confirmationBillboard = confirmations.remove(playerName);
-		if (!Utils.isSignBlock(clickedBlock.getType())) return; // not a sign
+		if (!Utils.isSign(clickedBlock.getType())) return; // not a sign
 
 		SoftBlockLocation blockLocation = new SoftBlockLocation(clickedBlock);
 		BillboardSign billboard = plugin.getBillboard(blockLocation);
@@ -160,7 +159,7 @@ public class SignInteraction implements Listener {
 			} else {
 				// is owner -> edit
 				ItemStack itemInHand = event.getItem();
-				if (itemInHand != null && itemInHand.getType() == Material.SIGN && billboard.canEdit(player)) {
+				if (itemInHand != null && Utils.isSign(itemInHand.getType()) && billboard.canEdit(player)) {
 					// do not cancel, so that the block place event is called that initializes sign editing:
 					event.setCancelled(false);
 					return;

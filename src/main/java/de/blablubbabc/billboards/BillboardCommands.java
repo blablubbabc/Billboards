@@ -42,7 +42,7 @@ public class BillboardCommands implements CommandExecutor {
 
 		// get targeted sign:
 		Block targetBlock = player.getTargetBlock((Set<Material>) null, 10);
-		if (targetBlock == null || !Utils.isSignBlock(targetBlock.getType())) {
+		if (targetBlock == null || !Utils.isSign(targetBlock.getType())) {
 			player.sendMessage(Messages.getMessage(Message.NO_TARGETED_SIGN));
 			return true;
 		}
