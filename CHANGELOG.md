@@ -8,6 +8,7 @@ Date format: (YYYY-MM-DD)
 ## v2.3.1 Release (TBA)
 ### Supported MC versions: 1.15, 1.14
 
+* Fixed: Due to an integer overflow the end date for rented signs could be wrong for some rent durations.
 
 ## v2.3.0 Release (2020-05-15)
 ### Supported MC versions: 1.15, 1.14

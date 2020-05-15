@@ -176,7 +176,7 @@ public class SignInteraction implements Listener {
 				long endTime = billboard.getEndTime();
 				player.sendMessage(Messages.getMessage(Message.INFO_RENT_UNTIL, dateFormat.format(new Date(endTime))));
 
-				long left = endTime - System.currentTimeMillis();
+				long left = billboard.getTimeLeft();
 				long days = TimeUnit.MILLISECONDS.toDays(left);
 				long hours = TimeUnit.MILLISECONDS.toHours(left) - TimeUnit.DAYS.toHours(days);
 				long minutes = TimeUnit.MILLISECONDS.toMinutes(left) - TimeUnit.DAYS.toMinutes(days) - TimeUnit.HOURS.toMinutes(hours);

@@ -166,11 +166,11 @@ public class BillboardSign {
 	}
 
 	public long getEndTime() {
-		return startTime + (durationInDays * 24 * 3600 * 1000);
+		return Utils.addSaturated(startTime, durationInDays * 24L * 3600L * 1000L);
 	}
 
 	public long getTimeLeft() {
-		return this.getEndTime() - System.currentTimeMillis();
+		return Utils.addSaturated(this.getEndTime(), -System.currentTimeMillis());
 	}
 
 	public boolean isRentOver() {

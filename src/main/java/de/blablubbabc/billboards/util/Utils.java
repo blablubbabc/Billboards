@@ -34,4 +34,16 @@ public class Utils {
 			return null;
 		}
 	}
+
+	public static long addSaturated(long x, long y) {
+		try {
+			return Math.addExact(x, y);
+		} catch (ArithmeticException e) {
+			if (y > 0) {
+				return Long.MAX_VALUE;
+			} else {
+				return Long.MIN_VALUE;
+			}
+		}
+	}
 }
