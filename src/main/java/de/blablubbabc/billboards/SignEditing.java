@@ -60,7 +60,7 @@ public class SignEditing implements Listener {
 		Player player = event.getPlayer();
 		String playerName = player.getName();
 
-		// cancel event, so other plugins ignore it and don't print messages for canceling it:
+		// Cancel the event early so that other plugins ignore it and don't print their cancellation messages:
 		event.setCancelled(true);
 
 		if (billboard.canEdit(player)) {
@@ -79,8 +79,21 @@ public class SignEditing implements Listener {
 		}
 	}
 
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
+	void onSignEditEarly(SignChangeEvent event) {
+		// We only handle the event early if bypassing of other plugins is enabled:
+		if (!plugin.bypassSignChangeBlocking) return;
+
+		Player player = event.getPlayer();
+		String playerName = player.getName();
+		if (!editing.containsKey(playerName)) return;
+
+		// Cancel the event early so that other plugins ignore it and don't print their cancellation messages:
+		event.setCancelled(true);
+	}
+
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = false)
-	void onSignEdit(SignChangeEvent event) {
+	void onSignEditLate(SignChangeEvent event) {
 		Player player = event.getPlayer();
 		SignEdit signEdit = this.endSignEdit(player);
 		if (signEdit == null) return; // player wasn't editing
@@ -96,7 +109,7 @@ public class SignEditing implements Listener {
 					}
 					target.update();
 				} else {
-					// some other plugin cancelled sign updating (ex. anti-swearing plugins):
+					// some other plugin cancelled sign updating (ex. anti-swearing plugins)
 				}
 			}
 		}

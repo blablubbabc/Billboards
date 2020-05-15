@@ -58,7 +58,10 @@ public class BillboardsPlugin extends JavaPlugin implements Listener {
 	public int defaultPrice = 10;
 	public int defaultDurationInDays = 7;
 	public int maxBillboardsPerPlayer = -1; // no limit by default
-	public boolean bypassSignChangeBlocking = false;
+	// Whether to bypass other plugins (eg. anti swearing plugins, but also protection plugins) when checking if the
+	// sign change event got cancelled. Unfortunately there is no way to differentiate between anti swearing plugins and
+	// protection plugins (which we usually always want to bypass).
+	public boolean bypassSignChangeBlocking = true;
 
 	// data:
 	private final Map<SoftBlockLocation, BillboardSign> billboards = new LinkedHashMap<>();
@@ -128,7 +131,7 @@ public class BillboardsPlugin extends JavaPlugin implements Listener {
 		defaultPrice = config.getInt("default-price", 10);
 		defaultDurationInDays = config.getInt("default-duration-in-days", 7);
 		maxBillboardsPerPlayer = config.getInt("max-billboards-per-player", -1);
-		bypassSignChangeBlocking = config.getBoolean("bypass-sign-change-blocking", false);
+		bypassSignChangeBlocking = config.getBoolean("bypass-sign-change-blocking", true);
 		// write changes back to config:
 		this.saveConfig();
 	}
