@@ -5,11 +5,13 @@ Date format: (YYYY-MM-DD)
 ### Supported MC versions: 
 * 
 
-## v2.3.0 Release (TBA)
+## v2.3.0 Release (2020-05-15)
 ### Supported MC versions: 1.15, 1.14
 
 * Bumped Bukkit dependency to 1.14. This also works on MC 1.15.
 * Added support for other types of signs. Note: The sign type used for editing does not necessarily need to match the sign type of the billboard sign.
+* The 'bypass-sign-change-blocking' setting is enabled by default now since we usually want to always bypass protection plugins such as WorldGuard, which reacts to sign editing by default as well.
+* If the bypass-sign-change-blocking' setting is enabled, we now cancel the sign change event early so that other plugins (such as WorldGuard) ignore it and don't print their cancellation message.
 
 ## v2.2.0 Release (2018-10-17)
 ### Supported MC versions: 1.13
