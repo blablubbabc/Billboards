@@ -5,7 +5,12 @@ Date format: (YYYY-MM-DD)
 ### Supported MC versions: 
 * 
 
-## v2.3.1 Release (TBA)
+## v2.3.2 Release (TBA)
+### Supported MC versions: 1.15, 1.14
+
+
+
+## v2.3.1 Release (2020-05-16)
 ### Supported MC versions: 1.15, 1.14
 
 * Fixed: Due to an integer overflow the end date for rented signs could be wrong for some rent durations.
