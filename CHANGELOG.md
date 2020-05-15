@@ -1,9 +1,28 @@
 # Changelog
 Date format: (YYYY-MM-DD)  
 
-## Next release
-### Supported MC versions: 1.12, 1.11, 1.10, 1.9, 1.8
+## Next release (TBA)
+### Supported MC versions: 
 * 
+
+## v2.3.0 Release (TBA)
+### Supported MC versions: 1.15, 1.14
+
+* Bumped Bukkit dependency to 1.14. This also works on MC 1.15.
+* Added support for other types of signs. Note: The sign type used for editing does not necessarily need to match the sign type of the billboard sign.
+
+## v2.2.0 Release (2018-10-17)
+### Supported MC versions: 1.13
+
+* Fixed an issue that would allow players to place blocks in protected regions.
+
+## v2.1.0 Release (2018-08-18)
+### Supported MC versions: 1.13
+
+* Updated for MC 1.13. Older versions are no longer supported from this update on.
+* Slightly improved the logic for returning the sign item:
+  * It now returns a sign item similar to the one used (including the sign item's meta data).
+  * It now tries to return the item to the correct hand (if the item was placed from the off hand). If the hand is full or contains a different item by now, it tries to add the item to the inventory. If the inventory cannot hold the item, it drops the item.
 
 ## v2.0.1 Release (2018-05-29)
 ### Supported MC versions: 1.12, 1.11, 1.10, 1.9, 1.8
